@@ -1,0 +1,66 @@
+{
+  "name": "chrodis",
+  "productName": "Chrodis",
+  "version": "0.1.0",
+  "description": "Chrodis desktop music workstation",
+  "author": "ForgeX",
+  "private": true,
+  "type": "module",
+  "main": "main.cjs",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "build": "tsc && vite build",
+    "package:mac": "npm run build && electron-builder --mac dir",
+    "test": "node --test test/*.test.mjs"
+  },
+  "build": {
+    "appId": "com.forgex.chrodis",
+    "productName": "Chrodis",
+    "artifactName": "Chrodis-${version}-${arch}.${ext}",
+    "afterPack": "scripts/after-pack.cjs",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "preload.cjs",
+      "public/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../projects/mandopop-3min.chrodis",
+        "to": "projects/mandopop-3min.chrodis"
+      }
+    ],
+    "mac": {
+      "target": [
+        "dir"
+      ],
+      "icon": "assets/chrodis-icon.icns",
+      "category": "public.app-category.music",
+      "identity": null,
+      "extendInfo": {
+        "CFBundleName": "Chrodis",
+        "CFBundleDisplayName": "Chrodis",
+        "CFBundleExecutable": "Chrodis",
+        "LSApplicationCategoryType": "public.app-category.music"
+      }
+    }
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "electron": "^31.0.0",
+    "electron-builder": "^26.8.1",
+    "typescript": "^5.4.0",
+    "vite": "^5.0.0"
+  }
+}
