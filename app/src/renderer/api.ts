@@ -14,6 +14,7 @@ export type AudioClip = {
 };
 export type Effect = { type: string; enabled: boolean; params: Record<string, unknown> };
 export type Track = {
+  id?: string;
   name: string;
   kind: 'instrument' | 'drum' | 'audio' | string;
   preset?: string;
@@ -28,6 +29,7 @@ export type Track = {
   clips: Clip[];
   audio_clips: AudioClip[];
   effects: Effect[];
+  synth_params?: Record<string, unknown> | null;
 };
 export type Project = {
   title: string;

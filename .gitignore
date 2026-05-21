@@ -16,3 +16,4 @@ app/dist/
 
 # Local exports and rendered audio
 exports/
+agents/

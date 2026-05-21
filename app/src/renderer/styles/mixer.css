@@ -1,0 +1,22 @@
+.mixer {
+  background: #1a1c20;
+  border-top: 2px solid #111820;
+  height: 100%;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.mixer-channel {
+  border-radius: 4px;
+}
+
+.mixer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mixer-buttons .mini {
+  min-width: 20px;
+}

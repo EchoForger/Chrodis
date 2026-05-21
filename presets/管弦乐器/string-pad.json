@@ -1,0 +1,46 @@
+{
+  "display_name": "String Pad",
+  "description": "弦乐感的合成铺底",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "saw",
+      "ratio": 1.0,
+      "gain": 0.34,
+      "detune_cents": -7
+    },
+    {
+      "wave": "saw",
+      "ratio": 1.0,
+      "gain": 0.34,
+      "detune_cents": 7
+    },
+    {
+      "wave": "triangle",
+      "ratio": 0.5,
+      "gain": 0.24,
+      "detune_cents": 0
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.18,
+    "decay": 0.42,
+    "sustain": 0.82,
+    "release": 0.5
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 2400,
+    "key_tracking": 0.15
+  },
+  "noise": {
+    "type": "none",
+    "gain": 0
+  },
+  "velocity": {
+    "amplitude": 0.9,
+    "brightness": 0.12
+  },
+  "output_gain": 0.26
+}

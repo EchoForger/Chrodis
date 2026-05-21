@@ -1,0 +1,38 @@
+{
+  "display_name": "Classic Keys",
+  "description": "干净的电钢琴/键盘基础音色",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "sine",
+      "ratio": 1.0,
+      "gain": 0.8,
+      "detune_cents": 0
+    },
+    {
+      "wave": "sine",
+      "ratio": 2.0,
+      "gain": 0.2,
+      "detune_cents": 0
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.006,
+    "decay": 0.25,
+    "sustain": 0.7,
+    "release": 0.06
+  },
+  "filter": {
+    "type": "none"
+  },
+  "noise": {
+    "type": "none",
+    "gain": 0
+  },
+  "velocity": {
+    "amplitude": 1.2,
+    "brightness": 0.0
+  },
+  "output_gain": 0.35
+}

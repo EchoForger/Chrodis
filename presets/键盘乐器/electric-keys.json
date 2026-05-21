@@ -1,0 +1,46 @@
+{
+  "display_name": "Electric Bell Keys",
+  "description": "带泛音的电钢琴铃感",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "sine",
+      "ratio": 1.0,
+      "gain": 0.72,
+      "detune_cents": 0
+    },
+    {
+      "wave": "triangle",
+      "ratio": 2.01,
+      "gain": 0.32,
+      "detune_cents": -2
+    },
+    {
+      "wave": "sine",
+      "ratio": 3.0,
+      "gain": 0.14,
+      "detune_cents": 3
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.004,
+    "decay": 0.42,
+    "sustain": 0.42,
+    "release": 0.18
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 5200,
+    "key_tracking": 0.2
+  },
+  "noise": {
+    "type": "none",
+    "gain": 0
+  },
+  "velocity": {
+    "amplitude": 1.25,
+    "brightness": 0.25
+  },
+  "output_gain": 0.34
+}

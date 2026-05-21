@@ -23,6 +23,13 @@ import {
 } from './api';
 import { RealtimeAudioEngine } from './realtime/engine';
 import { type PresetLibraryData } from './realtime/project';
+import { DeferredRange, PanKnob, ValueFader } from './components/controls';
+import { Mixer } from './components/Mixer';
+import { PresetPicker } from './components/PresetPicker';
+import { SheetMusicView } from './components/SheetMusicView';
+import { SynthEditor } from './components/SynthEditor';
+import { clamp } from './lib/controls';
+import { presetCategories, presetCategory, resolveBaseSystemPreset, synthEngineLabel } from './lib/presets';
 import { AudioRecorder, blobToBase64 } from './recording';
 import { DEFAULT_PREFERENCES, SHORTCUT_GROUPS, loadPreferences, savePreferences, verticalWheelDelta, type Preferences } from './preferences';
 import { midiThumbnailNotes } from './thumbnail';
@@ -55,7 +62,8 @@ type PreferenceTab = 'general' | 'audio' | 'editing' | 'display' | 'shortcuts';
 type DeviceOption = { deviceId: string; label: string; kind: MediaDeviceKind };
 type ClipDrag =
   | { mode: 'move'; track: number; clip: string; startX: number; initialBar: number; initialBeats: number }
-  | { mode: 'resize-left' | 'resize-right'; track: number; clip: string; startX: number; initialBar: number; initialBeats: number };
+  | { mode: 'resize-left' | 'resize-right'; track: number; clip: string; startX: number; initialBar: number; initialBeats: number }
+  | { mode: 'loop-right'; track: number; clip: string; startX: number; initialBeats: number; initialLoopCount: number };
 type NoteDrag =
   | { mode: 'move'; index: number; startX: number; startY: number; initialStart: number; initialPitch: number; initialDuration: number }
   | { mode: 'resize'; index: number; startX: number; initialDuration: number };
@@ -71,6 +79,7 @@ declare global {
 function App() {
   const [project, setProject] = useState<Project | null>(null);
   const [presets, setPresets] = useState<PresetLibraryData | null>(null);
+  const effectivePresets = presets;
   const [selected, setSelected] = useState<Selection>({ type: 'project' });
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
@@ -105,6 +114,13 @@ function App() {
   const [preferenceTab, setPreferenceTab] = useState<PreferenceTab>('general');
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>('library');
   const [libraryCategory, setLibraryCategory] = useState('钢琴');
+  const [showProjectSettings, setShowProjectSettings] = useState(false);
+  const [showSynthEditor, setShowSynthEditor] = useState(false);
+  const [showEditHint, setShowEditHint] = useState(false);
+  const [showMixer, setShowMixer] = useState(false);
+  const [mixerHeight, setMixerHeight] = useState(240);
+  const [quantizeStep, setQuantizeStep] = useState(0.25);
+  const [showKeyInput, setShowKeyInput] = useState(false);
   const [audioDevices, setAudioDevices] = useState<DeviceOption[]>([]);
   const projectRef = useRef<Project | null>(null);
   const presetsRef = useRef<PresetLibraryData | null>(null);
@@ -116,6 +132,7 @@ function App() {
   const selectedNotesRef = useRef<Set<string>>(selectedNotes);
   const preferencesRef = useRef<Preferences>(preferences);
   const menuHandlerRef = useRef<(command: MenuCommand) => void>(() => undefined);
+  const pendingPlayBeatRef = useRef<number | null>(null);
   const pxPerBar = Math.round(BASE_PX_PER_BAR * arrangerZoomX);
   const pxPerBeat = pxPerBar / 4;
   const laneHeight = Math.round(BASE_LANE_HEIGHT * arrangerZoomY);
@@ -170,6 +187,11 @@ function App() {
       engine.setMasterGain(preferencesRef.current.audio.masterGain);
       setIsRealtimeReady(true);
       if (projectRef.current && presetsRef.current) engine.updateProject(projectRef.current, presetsRef.current);
+      if (pendingPlayBeatRef.current !== null) {
+        const beat = pendingPlayBeatRef.current;
+        pendingPlayBeatRef.current = null;
+        engine.play(beat).then(() => { if (!disposed) setIsPlaying(true); }).catch(() => {});
+      }
     }).catch(error => {
       console.error('Realtime audio engine failed to start', error);
       setAudioError('实时音频启动失败');
@@ -218,6 +240,10 @@ function App() {
         if (clipDrag.mode === 'resize-right') {
           return { ...clip, beats: Math.max(1, clipDrag.initialBeats + delta) };
         }
+        if (clipDrag.mode === 'loop-right') {
+          const loopCount = Math.max(1, Math.round(clipDrag.initialLoopCount + delta / clipDrag.initialBeats));
+          return { ...clip, loop_count: loopCount };
+        }
         const maxDelta = Math.min(delta, clipDrag.initialBeats - 1);
         const startBeat = Math.max(0, beatIndexFromBar(clipDrag.initialBar) + maxDelta);
         return { ...clip, bar: barFromBeatIndex(startBeat), beats: Math.max(1, clipDrag.initialBeats - maxDelta) };
@@ -244,10 +270,12 @@ function App() {
       const note = notes[noteDrag.index];
       if (!note) return;
       if (noteDrag.mode === 'resize') {
-        const delta = snapBeats(event.clientX - noteDrag.startX, pianoPxPerBeat);
-        notes[noteDrag.index] = { ...note, duration: Math.max(0.25, noteDrag.initialDuration + delta) };
+        const rawDelta = snapBeats(event.clientX - noteDrag.startX, pianoPxPerBeat);
+        const delta = Math.round(rawDelta / quantizeStep) * quantizeStep;
+        notes[noteDrag.index] = { ...note, duration: Math.max(quantizeStep, noteDrag.initialDuration + delta) };
       } else {
-        const deltaX = snapBeats(event.clientX - noteDrag.startX, pianoPxPerBeat);
+        const rawDeltaX = snapBeats(event.clientX - noteDrag.startX, pianoPxPerBeat);
+        const deltaX = Math.round(rawDeltaX / quantizeStep) * quantizeStep;
         const deltaPitch = -Math.round((event.clientY - noteDrag.startY) / noteRow);
         notes[noteDrag.index] = noteFromStartBeats(
           Math.max(0, noteDrag.initialStart + deltaX),
@@ -310,6 +338,9 @@ function App() {
       } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
         event.preventDefault();
         saveCurrentProject();
+      } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setShowKeyInput(v => !v);
       } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'e') {
         event.preventDefault();
         void api('/api/export-midi', 'POST', { output: 'exports/gui/export.mid' });
@@ -437,7 +468,15 @@ function App() {
 
   async function patchTrack(index: number, patch: Partial<Track>) {
     mutateProject(draft => {
-      Object.assign(draft.tracks[index], patch);
+      const track = draft.tracks[index];
+      const changes = { ...patch };
+      if (Object.prototype.hasOwnProperty.call(changes, 'preset') && !Object.prototype.hasOwnProperty.call(changes, 'name')) {
+        const nextPreset = changes.preset;
+        if (nextPreset !== track.preset && shouldTrackNameFollowPreset(track, effectivePresets)) {
+          changes.name = nextPreset ? presetDisplayName(effectivePresets, nextPreset) : track.kind;
+        }
+      }
+      Object.assign(track, changes);
     });
   }
 
@@ -489,11 +528,12 @@ function App() {
 
   async function addTrack(kind: 'instrument' | 'drum' | 'audio' = 'instrument') {
     mutateProject(draft => {
+      const preset = kind === 'audio' ? undefined : 'SYSTEM/钢琴/piano';
       draft.tracks.push({
-        name: kind === 'audio' ? 'Audio Track' : 'New Instrument',
+        name: kind === 'audio' ? 'Audio Track' : presetDisplayName(effectivePresets, preset || ''),
         kind,
         channel: nextChannel(draft, kind),
-        preset: kind === 'audio' ? undefined : 'piano',
+        preset,
         volume: 96,
         pan: 64,
         muted: false,
@@ -525,7 +565,12 @@ function App() {
       return;
     }
     if (!engine || !isRealtimeReady) {
-      setAudioError('实时音频尚未就绪');
+      if (preferencesRef.current.audio.realtimeEnabled) {
+        pendingPlayBeatRef.current = currentBeat;
+        setAudioError(null);
+      } else {
+        setAudioError('偏好设置中已关闭实时音频');
+      }
       return;
     }
     if (isPlaying) {
@@ -628,7 +673,11 @@ function App() {
     selectClip(trackIndex, clip, isAdditiveSelection(event));
     if (tool !== 'pointer') return;
     pushUndoSnapshot();
-    setClipDrag({ mode, track: trackIndex, clip: clip.id, startX: event.clientX, initialBar: clip.bar, initialBeats: clip.beats });
+    if (mode === 'loop-right') {
+      setClipDrag({ mode: 'loop-right', track: trackIndex, clip: clip.id, startX: event.clientX, initialBeats: clip.beats, initialLoopCount: clip.loop_count || 1 });
+    } else {
+      setClipDrag({ mode, track: trackIndex, clip: clip.id, startX: event.clientX, initialBar: clip.bar, initialBeats: clip.beats });
+    }
   }
 
   function cutBeatFromClipEvent(event: React.MouseEvent, clip: Pick<Clip, 'bar'>): number {
@@ -639,9 +688,10 @@ function App() {
   function addNoteFromEditor(event: React.MouseEvent<HTMLDivElement>) {
     if (!editorClip || !openClip || event.detail !== 2) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const start = Math.max(0, snapBeats(event.clientX - rect.left, pianoPxPerBeat));
+    const rawBeats = Math.max(0, snapBeats(event.clientX - rect.left, pianoPxPerBeat));
+    const start = Math.round(rawBeats / quantizeStep) * quantizeStep;
     const pitch = yToPitch(event.clientY - rect.top, MAX_PITCH, MIN_PITCH, noteRow);
-    const note = noteFromStartBeats(start, pitch, 1, 88);
+    const note = noteFromStartBeats(start, pitch, quantizeStep * 4, 88);
     const notes = [...openClip.notes, note];
     updateClipLocal(editorClip.track, openClip.id, clip => ({ ...clip, notes }));
     void patchClip(editorClip.track, openClip.id, { notes });
@@ -661,6 +711,15 @@ function App() {
     const startY = event.clientY;
     const startHeight = editorHeight;
     const onMove = (move: MouseEvent) => setEditorHeight(clamp(startHeight - (move.clientY - startY), 180, 620));
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', () => window.removeEventListener('mousemove', onMove), { once: true });
+  }
+
+  function startMixerResize(event: React.MouseEvent) {
+    event.preventDefault();
+    const startY = event.clientY;
+    const startHeight = mixerHeight;
+    const onMove = (move: MouseEvent) => setMixerHeight(clamp(startHeight - (move.clientY - startY), 160, 420));
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', () => window.removeEventListener('mousemove', onMove), { once: true });
   }
@@ -1119,8 +1178,9 @@ function App() {
     mutateProject(draft => {
       const clip = draft.tracks[editorClip.track].clips.find(item => item.id === editorClip.clip);
       if (!clip) return;
+      const step = quantizeStep;
       clip.notes = clip.notes.map((note, index) => selectedNotes.has(keyForNote({ track: editorClip.track, clip: editorClip.clip, index }))
-        ? noteFromStartBeats(Math.round(noteStartBeats(note)), note.pitch, Math.max(0.25, Math.round(note.duration * 4) / 4), note.velocity)
+        ? noteFromStartBeats(Math.round(noteStartBeats(note) / step) * step, note.pitch, Math.max(step, Math.round(note.duration / step) * step), note.velocity)
         : note);
     });
   }
@@ -1164,11 +1224,11 @@ function App() {
   }
 
   return <div className="shell" onClick={() => setContextMenu(null)}>
-    <Transport project={project} currentBeat={currentBeat} isPlaying={isPlaying} isRecording={isRecording} isRealtimeReady={isRealtimeReady && preferences.audio.realtimeEnabled} audioError={audioError} canRecord={project.tracks.some(track => track.record_armed)} onPlay={togglePlayback} onStop={stopPlayback} onRecord={toggleRecording} />
+    <Transport project={project} currentBeat={currentBeat} isPlaying={isPlaying} isRecording={isRecording} isRealtimeReady={isRealtimeReady && preferences.audio.realtimeEnabled} audioError={audioError} canRecord={project.tracks.some(track => track.record_armed)} showMixer={showMixer} onPlay={togglePlayback} onStop={stopPlayback} onRecord={toggleRecording} onProjectSettings={() => setShowProjectSettings(true)} onToggleMixer={() => setShowMixer(v => !v)} />
     <main className="studio" style={{ gridTemplateColumns: `${inspectorWidth}px 6px 1fr` }}>
-      <Inspector project={project} presets={presets} tab={inspectorTab} libraryCategory={libraryCategory} selectedTrack={selectedTrack} selectedClip={selectedClip} selectedAudioClip={selectedAudioClip} selectedTrackIndex={selected.type !== 'project' ? selected.track : null} audioUrl={audioUrl} outputDeviceId={preferences.audio.outputDeviceId} onTab={setInspectorTab} onLibraryCategory={setLibraryCategory} onPatchProject={patchProjectMeta} onPatchTrack={patchTrack} onPatchClip={(patch) => { if (selectedClip && selected.type === 'clip') void patchClip(selected.track, selectedClip.id, patch); }} onPatchAudioClip={(patch) => { if (selectedAudioClip && selected.type !== 'project') void patchAudioClip(selected.track, selectedAudioClip.id, patch); }} onOpenEditor={() => selectedClip && selected.type === 'clip' ? openPianoRoll(selected.track, selectedClip) : undefined} />
+      <Inspector project={project} presets={effectivePresets} tab={inspectorTab} libraryCategory={libraryCategory} selected={selected} selectedTrack={selectedTrack} selectedClip={selectedClip} selectedAudioClip={selectedAudioClip} selectedTrackIndex={selected.type !== 'project' ? selected.track : null} audioUrl={audioUrl} outputDeviceId={preferences.audio.outputDeviceId} showEditHint={showEditHint} onShowEditHint={setShowEditHint} onTab={setInspectorTab} onLibraryCategory={setLibraryCategory} onPatchProject={patchProjectMeta} onPatchTrack={patchTrack} onPatchClip={(patch) => { if (selectedClip && selected.type === 'clip') void patchClip(selected.track, selectedClip.id, patch); }} onPatchAudioClip={(patch) => { if (selectedAudioClip && selected.type !== 'project') void patchAudioClip(selected.track, selectedAudioClip.id, patch); }} onOpenEditor={() => selectedClip && selected.type === 'clip' ? openPianoRoll(selected.track, selectedClip) : undefined} onOpenSynthEditor={() => setShowSynthEditor(true)} />
       <div className="panel-resizer vertical" onMouseDown={startInspectorResize} />
-      <section className={`arranger ${openClip && editorMode === 'docked' ? 'with-editor' : ''}`} style={{ gridTemplateRows: openClip && editorMode === 'docked' ? `minmax(220px, 1fr) 6px ${editorHeight}px` : '1fr' }}>
+      <section className={`arranger ${openClip && editorMode === 'docked' ? 'with-editor' : ''}`} style={{ gridTemplateRows: (() => { const rows = []; rows.push(openClip && editorMode === 'docked' ? `minmax(220px, 1fr) 6px ${editorHeight}px` : '1fr'); if (showMixer) rows.push(`6px ${mixerHeight}px`); return rows.join(' '); })() }}>
         <div className="arranger-scroll" onWheel={event => {
           if (event.altKey && !event.metaKey && !event.ctrlKey) {
             event.preventDefault();
@@ -1180,7 +1240,10 @@ function App() {
         }}>
           <div className="timeline-grid" style={{ width: trackHeaderWidth + timelineWidth }}>
             <div className="timeline-top-row" style={{ gridTemplateColumns: `${trackHeaderWidth}px ${timelineWidth}px` }}>
-              <div className="corner">轨道</div>
+              <div className="corner">轨道<button className="add-track-btn" title="添加轨道" onClick={event => openContextMenu(event, [
+                { label: '添加乐器轨道', action: () => void addTrack('instrument') },
+                { label: '添加音频轨道', action: () => void addTrack('audio') }
+              ])}>+</button></div>
               <div className="ruler" style={{ width: timelineWidth }} onMouseDown={seekFromTimeline}>
                 {Array.from({ length: project.length_bars }, (_, index) => index + 1).map(bar =>
                   <div className={`ruler-bar ${bar % 2 === 1 ? 'labelled' : ''}`} style={{ width: pxPerBar }} key={bar}>{bar % 2 === 1 ? bar : ''}</div>
@@ -1189,7 +1252,16 @@ function App() {
             </div>
             <div className="playhead" style={{ left: trackHeaderWidth + currentBeat * pxPerBeat, height: 38 + project.tracks.length * laneHeight }} />
             {project.tracks.map((track, index) => <div className="timeline-track-row" style={{ gridTemplateColumns: `${trackHeaderWidth}px ${timelineWidth}px` }} key={`${track.name}-${index}`}>
-              <TrackHeader track={track} index={index} selected={selected.type !== 'project' && selected.track === index} height={laneHeight} onSelect={() => setSelected({ type: 'track', track: index })} onPatch={(patch) => patchTrack(index, patch)} onContextMenu={event => openContextMenu(event, [
+              <TrackHeader track={track} index={index} selected={selected.type === 'track' && selected.track === index} height={laneHeight} onSelect={() => {
+                setSelected({ type: 'track', track: index });
+                setInspectorTab('library');
+                if (track.preset && effectivePresets) {
+                  const baseName = resolveBaseSystemPreset(track.preset, effectivePresets);
+                  const basePreset = effectivePresets.presets.find(pr => pr.name === baseName);
+                  const cat = basePreset ? presetCategory(basePreset) : undefined;
+                  if (cat) setLibraryCategory(cat);
+                }
+              }} onPatch={(patch) => patchTrack(index, patch)} onContextMenu={event => openContextMenu(event, [
                 { label: '重命名轨道', action: () => renameTrack(index) },
                 { label: track.muted ? '取消静音' : '静音', action: () => void patchTrack(index, { muted: !track.muted }) },
                 { label: track.solo ? '取消独奏' : '独奏', action: () => void patchTrack(index, { solo: !track.solo }) },
@@ -1198,7 +1270,7 @@ function App() {
                 { label: '添加音频轨道', action: () => void addTrack('audio') },
                 { label: '删除轨道', action: () => void deleteTrack(index) }
               ])} />
-              <div className={`lane tool-${tool}`} style={{ width: timelineWidth, height: laneHeight, backgroundSize: `${pxPerBar}px 100%,${pxPerBeat}px 100%` }} onMouseDown={event => startClipMarquee(event, index)} onClick={event => { if (tool !== 'marquee') { seekFromTimeline(event); setSelected({ type: 'track', track: index }); } }}>
+              <div className={`lane tool-${tool}`} style={{ width: timelineWidth, height: laneHeight, backgroundSize: `${pxPerBar}px 100%,${pxPerBeat}px 100%` }} onMouseDown={event => startClipMarquee(event, index)} onClick={event => { if (tool !== 'marquee') { setSelected({ type: 'project' }); setSelectedClips(new Set()); } }}>
                 {track.clips.map(clip => <div
                   className={`clip ${selectedClips.has(keyForClip({ track: index, id: clip.id, kind: 'midi' })) ? 'selected' : ''}`}
                   key={clip.id}
@@ -1215,10 +1287,10 @@ function App() {
                     { label: '删除', action: () => deleteClipDirect(index, clip.id, 'midi') }
                   ])}
                   onDoubleClick={event => { event.stopPropagation(); openPianoRoll(index, clip); }}
-                  style={{ left: clipLeft(clip.bar, pxPerBar), width: clipWidth(clip.beats, pxPerBar), height: laneHeight, background: clip.color }}
+                  style={{ left: clipLeft(clip.bar, pxPerBar), width: clipWidth(clip.beats * (clip.loop_count || 1), pxPerBar), height: laneHeight, background: clip.color }}
                 >
                   <div className="clip-handle left" onMouseDown={event => tool === 'pointer' && startClipDrag(event, 'resize-left', index, clip)} />
-                  <div className="clip-title">{clip.name}</div>
+                  <div className="clip-title">{clip.name}{(clip.loop_count || 1) > 1 ? ` ×${clip.loop_count}` : ''}<div className="clip-loop-handle" onMouseDown={event => { event.preventDefault(); event.stopPropagation(); tool === 'pointer' && startClipDrag(event, 'loop-right', index, clip); }} /></div>
                   {preferences.display.showMidiThumbnails ? <MidiThumbnail clip={clip} /> : <div className="clip-notes">{'· '.repeat(Math.min(36, clip.notes.length))}</div>}
                   <div className="clip-handle right" onMouseDown={event => tool === 'pointer' && startClipDrag(event, 'resize-right', index, clip)} />
                 </div>)}
@@ -1244,8 +1316,10 @@ function App() {
             {marquee && <div className="marquee-box" style={{ left: Math.min(marquee.startX, marquee.x), top: Math.min(marquee.startY, marquee.y), width: Math.abs(marquee.x - marquee.startX), height: Math.abs(marquee.y - marquee.startY) }} />}
           </div>
         </div>
+        {showMixer && <div className="panel-resizer horizontal" onMouseDown={startMixerResize} />}
+        {showMixer && <Mixer project={project} onPatchTrack={patchTrack} renderTrackIcon={track => <TrackIcon kind={track.kind} preset={track.preset} size={18} />} />}
         {openClip && editorMode === 'docked' && <div className="panel-resizer horizontal" onMouseDown={startEditorResize} />}
-        {openClip && editorMode === 'docked' && <PianoRoll trackIndex={editorClip!.track} track={project.tracks[editorClip!.track]} clip={openClip} tool={tool} mode={editorMode} selectedNotes={selectedNotes} selectedNote={selectedNote} noteRow={noteRow} pxPerBeat={pianoPxPerBeat} verticalWheelDirection={preferences.editing.verticalWheelDirection} onZoom={zoomPiano} onMode={setEditorMode} onClose={() => setEditorClip(null)} onCanvasDoubleClick={addNoteFromEditor} onSelectNote={(event, index) => selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event))} onContextNote={(event, index) => { selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event)); openContextMenu(event, [
+        {openClip && editorMode === 'docked' && <PianoRoll trackIndex={editorClip!.track} track={project.tracks[editorClip!.track]} clip={openClip} tool={tool} mode={editorMode} selectedNotes={selectedNotes} selectedNote={selectedNote} noteRow={noteRow} pxPerBeat={pianoPxPerBeat} verticalWheelDirection={preferences.editing.verticalWheelDirection} onZoom={zoomPiano} onMode={setEditorMode} onClose={() => setEditorClip(null)} quantizeStep={quantizeStep} onQuantizeStep={setQuantizeStep} onCanvasDoubleClick={addNoteFromEditor} onSelectNote={(event, index) => selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event))} onContextNote={(event, index) => { selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event)); openContextMenu(event, [
           { label: '删除音符', action: () => deleteNoteDirect(editorClip!.track, openClip.id, index) },
           { label: '复制音符', action: () => copyNoteDirect(editorClip!.track, openClip.id, index) },
           { label: '复制一份', action: () => duplicateNoteDirect(editorClip!.track, openClip.id, index) },
@@ -1257,11 +1331,11 @@ function App() {
           setNoteDrag(mode === 'resize'
             ? { mode, index, startX: event.clientX, initialDuration: note.duration }
             : { mode, index, startX: event.clientX, startY: event.clientY, initialStart: noteStartBeats(note), initialPitch: note.pitch, initialDuration: note.duration });
-        }} />}
+        }} onPreviewNote={pitch => { const p = effectivePresets?.presets.find(pr => pr.name === project.tracks[editorClip!.track].preset); void engineRef.current?.previewNote(pitch, (p || {}) as Record<string, unknown>); }} onStopPreviewNote={pitch => engineRef.current?.stopPreviewNote(pitch)} currentBeat={currentBeat} />}
       </section>
     </main>
     {openClip && editorMode === 'floating' && <div className="editor-overlay">
-      <PianoRoll trackIndex={editorClip!.track} track={project.tracks[editorClip!.track]} clip={openClip} tool={tool} mode={editorMode} selectedNotes={selectedNotes} selectedNote={selectedNote} noteRow={noteRow} pxPerBeat={pianoPxPerBeat} verticalWheelDirection={preferences.editing.verticalWheelDirection} onZoom={zoomPiano} onMode={setEditorMode} onClose={() => setEditorClip(null)} onCanvasDoubleClick={addNoteFromEditor} onSelectNote={(event, index) => selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event))} onContextNote={(event, index) => { selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event)); openContextMenu(event, [
+      <PianoRoll trackIndex={editorClip!.track} track={project.tracks[editorClip!.track]} clip={openClip} tool={tool} mode={editorMode} selectedNotes={selectedNotes} selectedNote={selectedNote} noteRow={noteRow} pxPerBeat={pianoPxPerBeat} verticalWheelDirection={preferences.editing.verticalWheelDirection} onZoom={zoomPiano} onMode={setEditorMode} onClose={() => setEditorClip(null)} quantizeStep={quantizeStep} onQuantizeStep={setQuantizeStep} onCanvasDoubleClick={addNoteFromEditor} onSelectNote={(event, index) => selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event))} onContextNote={(event, index) => { selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event)); openContextMenu(event, [
         { label: '删除音符', action: () => deleteNoteDirect(editorClip!.track, openClip.id, index) },
         { label: '复制音符', action: () => copyNoteDirect(editorClip!.track, openClip.id, index) },
         { label: '复制一份', action: () => duplicateNoteDirect(editorClip!.track, openClip.id, index) },
@@ -1273,34 +1347,41 @@ function App() {
         setNoteDrag(mode === 'resize'
           ? { mode, index, startX: event.clientX, initialDuration: note.duration }
           : { mode, index, startX: event.clientX, startY: event.clientY, initialStart: noteStartBeats(note), initialPitch: note.pitch, initialDuration: note.duration });
-      }} />
+      }} onPreviewNote={pitch => { const p = effectivePresets?.presets.find(pr => pr.name === project.tracks[editorClip!.track].preset); void engineRef.current?.previewNote(pitch, (p || {}) as Record<string, unknown>); }} onStopPreviewNote={pitch => engineRef.current?.stopPreviewNote(pitch)} currentBeat={currentBeat} />
     </div>}
     {contextMenu && <ContextMenuView menu={contextMenu} onClose={() => setContextMenu(null)} />}
     {showNewProject && <NewProjectDialog value={newProject} onChange={setNewProject} onCancel={() => setShowNewProject(false)} onCreate={createNewProject} />}
     {showPreferences && <PreferencesDialog value={preferences} tab={preferenceTab} devices={audioDevices} onTab={setPreferenceTab} onChange={setPreferences} onClose={() => setShowPreferences(false)} />}
+    {showProjectSettings && <ProjectSettingsDialog project={project} onPatch={patchProjectMeta} onClose={() => setShowProjectSettings(false)} />}
+    {showSynthEditor && selectedTrack && selected.type !== 'project' && selected.track !== undefined && <SynthEditor track={selectedTrack} trackIndex={selected.track} presets={effectivePresets} onPatchTrack={patchTrack} onClose={() => setShowSynthEditor(false)} renderTrackIcon={(track, size) => <TrackIcon kind={track.kind} preset={track.preset} size={size} />} />}
+    {showKeyInput && <KeyInputPanel preset={(effectivePresets?.presets.find(p => p.name === selectedTrack?.preset) || {}) as Record<string, unknown>} onPreviewNote={(pitch, preset, vel) => void engineRef.current?.previewNote(pitch, preset, vel)} onStopPreviewNote={pitch => engineRef.current?.stopPreviewNote(pitch)} onClose={() => setShowKeyInput(false)} />}
   </div>;
 }
 
-function Transport({ project, currentBeat, isPlaying, isRecording, isRealtimeReady, audioError, canRecord, onPlay, onStop, onRecord }: { project: Project; currentBeat: number; isPlaying: boolean; isRecording: boolean; isRealtimeReady: boolean; audioError: string | null; canRecord: boolean; onPlay: () => void; onStop: () => void; onRecord: () => void }) {
+function Transport({ project, currentBeat, isPlaying, isRecording, isRealtimeReady, audioError, canRecord, showMixer, onPlay, onStop, onRecord, onProjectSettings, onToggleMixer }: { project: Project; currentBeat: number; isPlaying: boolean; isRecording: boolean; isRealtimeReady: boolean; audioError: string | null; canRecord: boolean; showMixer: boolean; onPlay: () => void; onStop: () => void; onRecord: () => void; onProjectSettings: () => void; onToggleMixer: () => void }) {
   const bar = Math.floor(currentBeat / 4) + 1;
   const beat = Math.floor(currentBeat % 4) + 1;
   return <header className="transport">
     <div className="tool-group"><button className="icon-button" onClick={onStop}>■</button><button className="icon-button primary" disabled={!isRealtimeReady} onClick={onPlay}>{isPlaying ? '❚❚' : '▶'}</button><button className={`icon-button record ${isRecording ? 'active' : ''}`} disabled={!canRecord && !isRecording} title={canRecord || isRecording ? '录音' : '先在轨道上打开 R'} onClick={onRecord}>●</button></div>
     <div className={`lcd ${audioError ? 'warning' : ''}`}><strong>{String(bar).padStart(3, '0')} {beat}</strong><span>{audioError || (isRealtimeReady ? '实时' : '启动中')} · {project.bpm} BPM · {project.time_signature} · {project.key}</span></div>
+    <div className="transport-right"><button className={`icon-button ${showMixer ? 'active' : ''}`} title="混音台" onClick={onToggleMixer}>台</button><button className="icon-button" title="项目设置" onClick={onProjectSettings}>⚙</button></div>
   </header>;
 }
 
-function Inspector({ project, presets, tab, libraryCategory, selectedTrack, selectedClip, selectedAudioClip, selectedTrackIndex, audioUrl, outputDeviceId, onTab, onLibraryCategory, onPatchProject, onPatchTrack, onPatchClip, onPatchAudioClip, onOpenEditor }: {
+function Inspector({ project, presets, tab, libraryCategory, selected, selectedTrack, selectedClip, selectedAudioClip, selectedTrackIndex, audioUrl, outputDeviceId, showEditHint, onShowEditHint, onTab, onLibraryCategory, onPatchProject, onPatchTrack, onPatchClip, onPatchAudioClip, onOpenEditor, onOpenSynthEditor }: {
   project: Project;
   presets: PresetLibraryData | null;
   tab: InspectorTab;
   libraryCategory: string;
+  selected: Selection;
   selectedTrack: Track | null;
   selectedClip: Clip | null;
   selectedAudioClip: AudioClip | null;
   selectedTrackIndex: number | null;
   audioUrl: string | null;
   outputDeviceId: string;
+  showEditHint: boolean;
+  onShowEditHint: (show: boolean) => void;
   onTab: (tab: InspectorTab) => void;
   onLibraryCategory: (category: string) => void;
   onPatchProject: (patch: Partial<Pick<Project, 'title' | 'bpm' | 'key' | 'time_signature' | 'length_bars'>>) => void;
@@ -1308,11 +1389,15 @@ function Inspector({ project, presets, tab, libraryCategory, selectedTrack, sele
   onPatchClip: (patch: Partial<Clip>) => void | undefined;
   onPatchAudioClip: (patch: Partial<AudioClip>) => void | undefined;
   onOpenEditor: () => void | undefined;
+  onOpenSynthEditor: () => void;
 }) {
-  const libraryPresets = (presets?.presets || []).filter(preset => preset.category);
-  const categories = Array.from(new Set(libraryPresets.map(preset => String(preset.category))));
+  const libraryPresets = (presets?.presets || []).filter(preset => presetCategory(preset) !== undefined);
+  const categories = presetCategories(libraryPresets);
   const currentCategory = categories.includes(libraryCategory) ? libraryCategory : categories[0] || '钢琴';
-  const categoryPresets = libraryPresets.filter(preset => preset.category === currentCategory);
+  const categoryPresets = libraryPresets.filter(preset => presetCategory(preset) === currentCategory);
+  const baseSystemPresetName = selectedTrack?.preset && presets
+    ? resolveBaseSystemPreset(selectedTrack.preset, presets)
+    : selectedTrack?.preset;
   return <aside className="inspector">
     <div className="inspector-tabs">
       <button className={tab === 'library' ? 'active' : ''} onClick={() => onTab('library')}>资源库</button>
@@ -1321,36 +1406,34 @@ function Inspector({ project, presets, tab, libraryCategory, selectedTrack, sele
     {tab === 'library' && <section className="library-section">
       {selectedTrack && selectedTrackIndex !== null && selectedTrack.kind !== 'audio' ? <>
         <div className="library-hero">
-          <div className="instrument-art">{instrumentInitial(selectedTrack.preset || 'piano')}</div>
-          <strong>{presetDisplayName(presets, selectedTrack.preset || 'piano')}</strong>
+          <div className="instrument-art" onMouseEnter={() => onShowEditHint(true)} onMouseLeave={() => onShowEditHint(false)}>
+            <TrackIcon kind={selectedTrack.kind} preset={selectedTrack.preset} size={48} />
+            {showEditHint && <button className="edit-synth-btn" onClick={onOpenSynthEditor}>✎</button>}
+          </div>
+          <strong>{selectedTrack.preset ? presetDisplayName(presets, selectedTrack.preset) : '未选择乐器'}</strong>
           <span>{selectedTrack.name}</span>
         </div>
         <div className="library-browser">
           <div className="library-categories">{categories.map(category => <button key={category} className={category === currentCategory ? 'active' : ''} onClick={() => onLibraryCategory(category)}>{category}</button>)}</div>
-          <div className="library-presets">{categoryPresets.map(preset => <button key={preset.name} className={preset.name === selectedTrack.preset ? 'active' : ''} onClick={() => onPatchTrack(selectedTrackIndex, { preset: preset.name })}>
-            <strong>{preset.display_name || preset.name}</strong>
-            <span>{preset.description || preset.name}</span>
+          <div className="library-presets">{categoryPresets.map(preset => <button key={preset.name} className={preset.name === baseSystemPresetName ? 'active' : ''} onClick={() => onPatchTrack(selectedTrackIndex, { preset: preset.name, synth_params: null })}>
+            <strong>{preset.display_name || '未命名预设'}</strong>
+            {preset.description && <span>{preset.description}</span>}
+            <small className="preset-engine-tag">{synthEngineLabel(preset.synth_engine)}</small>
           </button>)}</div>
         </div>
       </> : <div className="empty-state">{selectedTrack?.kind === 'audio' ? '音频轨没有软件乐器。' : '选择一个乐器轨道后可以在这里更换声音。'}</div>}
     </section>}
     {tab === 'inspector' && <>
-      <section className="project-section">
-        <h3>工程</h3>
-        <EditableInput label="标题" value={project.title} onCommit={value => onPatchProject({ title: value })} />
-        <div className="field-grid"><EditableInput label="BPM" type="number" value={project.bpm} min={40} max={240} onCommit={value => onPatchProject({ bpm: Number(value) })} /><EditableInput label="长度" type="number" value={project.length_bars} min={1} onCommit={value => onPatchProject({ length_bars: Number(value) })} /></div>
-        <div className="field-grid"><EditableInput label="拍号" value={project.time_signature} onCommit={value => onPatchProject({ time_signature: value })} /><EditableInput label="调性" value={project.key} onCommit={value => onPatchProject({ key: value })} /></div>
-        <div className="meta">{project.tracks.length} tracks</div>
-      </section>
-      {selectedTrack && selectedTrackIndex !== null && <section>
+      {selected.type === 'project' && <div className="empty-state">点击轨道或片段以查看属性</div>}
+      {selected.type !== 'project' && selectedTrack && selectedTrackIndex !== null && selectedClip === null && selectedAudioClip === null && <section>
         <h3>轨道</h3>
         <EditableInput label="名称" value={selectedTrack.name} onCommit={value => onPatchTrack(selectedTrackIndex, { name: value })} />
-        <EditableInput label="Preset" value={selectedTrack.preset || ''} onCommit={value => onPatchTrack(selectedTrackIndex, { preset: value || undefined })} />
-        <label>Volume</label><DeferredRange min={0} max={127} value={selectedTrack.volume} onCommit={value => onPatchTrack(selectedTrackIndex, { volume: value })} />
-        <label>Pan</label><DeferredRange min={0} max={127} value={selectedTrack.pan} onCommit={value => onPatchTrack(selectedTrackIndex, { pan: value })} />
+        <label>Preset<PresetPicker presets={presets} value={selectedTrack.preset} onChange={name => onPatchTrack(selectedTrackIndex, { preset: name || undefined, synth_params: null })} /></label>
+        <label>Volume</label><ValueFader value={selectedTrack.volume} onChange={value => onPatchTrack(selectedTrackIndex, { volume: value })} />
+        <label>Pan</label><PanKnob value={selectedTrack.pan} onChange={value => onPatchTrack(selectedTrackIndex, { pan: value })} />
         <div className="button-row"><button className={selectedTrack.muted ? 'active' : ''} onClick={() => onPatchTrack(selectedTrackIndex, { muted: !selectedTrack.muted })}>Mute</button><button className={selectedTrack.solo ? 'active' : ''} onClick={() => onPatchTrack(selectedTrackIndex, { solo: !selectedTrack.solo })}>Solo</button><button className={selectedTrack.record_armed ? 'record active' : 'record'} onClick={() => onPatchTrack(selectedTrackIndex, { record_armed: !selectedTrack.record_armed })}>Rec</button></div>
       </section>}
-      {selectedClip && <section>
+      {selected.type !== 'project' && selectedClip && <section>
         <h3>片段</h3>
         <EditableInput label="名称" value={selectedClip.name} onCommit={value => onPatchClip({ name: value })} />
         <div className="field-grid"><EditableInput label="Bar" type="number" value={selectedClip.bar} min={1} step={0.25} onCommit={value => onPatchClip({ bar: Number(value) })} /><EditableInput label="Beats" type="number" value={selectedClip.beats} min={1} step={1} onCommit={value => onPatchClip({ beats: Number(value) })} /></div>
@@ -1358,7 +1441,7 @@ function Inspector({ project, presets, tab, libraryCategory, selectedTrack, sele
         <label>Color</label><input type="color" value={selectedClip.color} onChange={e => onPatchClip({ color: e.target.value })} />
         <button className="wide" onClick={onOpenEditor}>打开 MIDI 编辑器</button>
       </section>}
-      {selectedAudioClip && <section>
+      {selected.type !== 'project' && selectedAudioClip && <section>
         <h3>音频片段</h3>
         <EditableInput label="名称" value={selectedAudioClip.name} onCommit={value => onPatchAudioClip({ name: value })} />
         <div className="field-grid"><EditableInput label="Bar" type="number" value={selectedAudioClip.bar} min={1} step={0.25} onCommit={value => onPatchAudioClip({ bar: Number(value) })} /><EditableInput label="Beats" type="number" value={selectedAudioClip.beats} min={1} step={1} onCommit={value => onPatchAudioClip({ beats: Number(value) })} /></div>
@@ -1443,11 +1526,33 @@ function CheckRow({ label, checked, onChange }: { label: string; checked: boolea
   return <label className="check-row"><input type="checkbox" checked={checked} onChange={event => onChange(event.target.checked)} />{label}</label>;
 }
 
+function IconPiano() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><rect x="2" y="5" width="6" height="14" rx="1"/><rect x="9" y="5" width="6" height="14" rx="1"/><rect x="16" y="5" width="6" height="14" rx="1"/><rect x="5.5" y="5" width="4" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="13.5" y="5" width="4" height="9" rx="0.5" fill="currentColor" stroke="none"/></svg>; }
+function IconBass() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><path d="M6 4 Q14 2 15 10 Q16 17 9 18"/><circle cx="17" cy="7" r="1.5" fill="currentColor"/><circle cx="17" cy="13" r="1.5" fill="currentColor"/><line x1="4" y1="11" x2="7" y2="11"/><line x1="4" y1="14" x2="7" y2="14"/></svg>; }
+function IconDrum() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><ellipse cx="12" cy="15" rx="8" ry="4"/><line x1="4" y1="11" x2="4" y2="15"/><line x1="20" y1="11" x2="20" y2="15"/><ellipse cx="12" cy="11" rx="8" ry="3"/><line x1="8" y1="8" x2="5" y2="3"/><line x1="16" y1="8" x2="19" y2="3"/></svg>; }
+function IconSynth() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><rect x="2" y="8" width="20" height="10" rx="2"/><circle cx="6.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/><circle cx="17.5" cy="13" r="1.5"/><line x1="5" y1="8" x2="5" y2="5"/><line x1="10" y1="8" x2="10" y2="5"/><line x1="15" y1="8" x2="15" y2="5"/><line x1="20" y1="8" x2="20" y2="5"/></svg>; }
+function IconGuitar() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><ellipse cx="12" cy="16" rx="5" ry="5"/><ellipse cx="12" cy="9" rx="3" ry="3"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="10" y1="3.5" x2="14" y2="3.5"/><circle cx="12" cy="16" r="1.2" fill="currentColor"/></svg>; }
+function IconPad() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><rect x="13" y="13" width="9" height="9" rx="1.5"/></svg>; }
+function IconAudio() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><polyline points="2,12 5,7 7,17 10,5 12,19 14,8 16,15 19,10 22,12"/></svg>; }
+function IconKeys() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '100%', height: '100%' }}><rect x="2" y="6" width="20" height="12" rx="1.5"/><line x1="6" y1="6" x2="6" y2="18"/><line x1="10" y1="6" x2="10" y2="18"/><line x1="14" y1="6" x2="14" y2="18"/><line x1="18" y1="6" x2="18" y2="18"/><rect x="4.5" y="6" width="3" height="7" rx="0.5" fill="currentColor" stroke="none"/><rect x="8.5" y="6" width="3" height="7" rx="0.5" fill="currentColor" stroke="none"/><rect x="16.5" y="6" width="3" height="7" rx="0.5" fill="currentColor" stroke="none"/></svg>; }
+
+function TrackIcon({ kind, preset, size = 20 }: { kind: string; preset?: string | null; size?: number }) {
+  const name = (preset || kind || '').toLowerCase();
+  const Icon = name.includes('drum') ? IconDrum
+    : name.includes('bass') ? IconBass
+    : name.includes('guitar') ? IconGuitar
+    : name.includes('pad') ? IconPad
+    : (name.includes('lead') || name.includes('synth') || name.includes('pluck')) ? IconSynth
+    : name.includes('keys') || name.includes('electric') ? IconKeys
+    : kind === 'audio' ? IconAudio
+    : IconPiano;
+  return <span style={{ width: size, height: size, display: 'inline-flex', color: 'rgba(255,255,255,0.8)', flexShrink: 0 }}><Icon /></span>;
+}
+
 function TrackHeader({ track, index, selected, height, onSelect, onPatch, onContextMenu }: { track: Track; index: number; selected: boolean; height: number; onSelect: () => void; onPatch: (patch: Partial<Track>) => void; onContextMenu: (event: React.MouseEvent) => void }) {
   return <div className={`track-head ${selected ? 'selected' : ''}`} onClick={onSelect} onContextMenu={onContextMenu} style={{ height }}>
-    <div className="track-index">{index + 1}</div>
-    <div className="track-main"><strong>{track.name}</strong><span>{track.preset || track.kind}</span><small>vol {track.volume} · pan {track.pan}</small></div>
-    <DeferredRange className="track-slider" min={0} max={127} value={track.volume} onClick={event => event.stopPropagation()} onCommit={value => onPatch({ volume: value })} />
+    <div className="track-index-icon"><TrackIcon kind={track.kind} preset={track.preset} size={20} /><span className="track-num">{index + 1}</span></div>
+    <div className="track-main"><strong>{track.name}</strong></div>
+    <ValueFader className="track-slider" value={track.volume} onClick={event => event.stopPropagation()} onChange={value => onPatch({ volume: value })} />
     <button className={track.muted ? 'mini active' : 'mini'} onClick={event => { event.stopPropagation(); onPatch({ muted: !track.muted }); }}>M</button>
     <button className={track.solo ? 'mini active' : 'mini'} onClick={event => { event.stopPropagation(); onPatch({ solo: !track.solo }); }}>S</button>
     <button className={track.record_armed ? 'mini record active' : 'mini record'} onClick={event => { event.stopPropagation(); onPatch({ record_armed: !track.record_armed }); }}>R</button>
@@ -1475,24 +1580,7 @@ function EditableInput({ label, value, type = 'text', min, max, step, onCommit }
   }} /></label>;
 }
 
-function DeferredRange({ value, min, max, step = 1, className, onClick, onCommit }: { value: number; min: number; max: number; step?: number; className?: string; onClick?: (event: React.MouseEvent<HTMLInputElement>) => void; onCommit: (value: number) => void }) {
-  const [draft, setDraft] = useState(value);
-  const [dirty, setDirty] = useState(false);
-  useEffect(() => {
-    if (!dirty) setDraft(value);
-  }, [value, dirty]);
-  function commit() {
-    if (!dirty) return;
-    setDirty(false);
-    if (draft !== value) onCommit(draft);
-  }
-  return <input className={className} type="range" min={min} max={max} step={step} value={draft} onClick={onClick} onChange={event => {
-    setDirty(true);
-    setDraft(Number(event.currentTarget.value));
-  }} onPointerUp={commit} onKeyUp={commit} onBlur={commit} />;
-}
-
-function PianoRoll({ trackIndex, track, clip, tool, mode, selectedNotes, selectedNote, noteRow, pxPerBeat, verticalWheelDirection, onZoom, onMode, onClose, onCanvasDoubleClick, onSelectNote, onContextNote, onMarquee, onNoteMouseDown }: {
+function PianoRoll({ trackIndex, track, clip, tool, mode, selectedNotes, selectedNote, noteRow, pxPerBeat, verticalWheelDirection, quantizeStep, onQuantizeStep, onZoom, onMode, onClose, onCanvasDoubleClick, onSelectNote, onContextNote, onMarquee, onNoteMouseDown, onPreviewNote, onStopPreviewNote, currentBeat }: {
   trackIndex: number;
   track: Track;
   clip: Clip;
@@ -1503,6 +1591,8 @@ function PianoRoll({ trackIndex, track, clip, tool, mode, selectedNotes, selecte
   noteRow: number;
   pxPerBeat: number;
   verticalWheelDirection: Preferences['editing']['verticalWheelDirection'];
+  quantizeStep: number;
+  onQuantizeStep: (step: number) => void;
   onZoom: (axis: 'x' | 'y', amount: number) => void;
   onMode: (mode: EditorMode) => void;
   onClose: () => void;
@@ -1511,10 +1601,14 @@ function PianoRoll({ trackIndex, track, clip, tool, mode, selectedNotes, selecte
   onContextNote: (event: React.MouseEvent, index: number) => void;
   onMarquee: (notes: Set<string>) => void;
   onNoteMouseDown: (event: React.MouseEvent, index: number, mode: NoteDrag['mode']) => void;
+  onPreviewNote?: (pitch: number) => void;
+  onStopPreviewNote?: (pitch?: number) => void;
+  currentBeat?: number;
 }) {
   const pitches = useMemo(() => Array.from({ length: MAX_PITCH - MIN_PITCH + 1 }, (_, index) => MAX_PITCH - index), []);
   const width = Math.max(clip.beats * pxPerBeat, 12 * pxPerBeat * 4);
   const [localMarquee, setLocalMarquee] = useState<Marquee | null>(null);
+  const [scoreTab, setScoreTab] = useState<'piano' | 'score'>('piano');
   function startNoteMarquee(event: React.MouseEvent<HTMLDivElement>) {
     if (tool !== 'marquee') return;
     event.preventDefault();
@@ -1544,13 +1638,23 @@ function PianoRoll({ trackIndex, track, clip, tool, mode, selectedNotes, selecte
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp, { once: true });
   }
+  const clipStartBeat = (clip.bar - 1) * 4;
   return <section className={`piano-roll ${mode}`}>
     <div className="editor-toolbar">
       <strong>{track.name} · {clip.name}</strong>
       <span>{clip.notes.length} notes</span>
+      <div className="editor-tabs"><button className={scoreTab === 'piano' ? 'active' : ''} onClick={() => setScoreTab('piano')}>钢琴卷帘</button><button className={scoreTab === 'score' ? 'active' : ''} onClick={() => setScoreTab('score')}>乐谱</button></div>
+      {scoreTab === 'piano' && <select value={quantizeStep} onChange={e => onQuantizeStep(Number(e.target.value))} style={{ width: 'auto' }}>
+        <option value={1}>1/4</option>
+        <option value={0.5}>1/8</option>
+        <option value={0.25}>1/16</option>
+        <option value={0.125}>1/32</option>
+        <option value={0.0625}>1/64</option>
+      </select>}
     </div>
-    <div className="piano-body">
-      <div className="keys">{pitches.map(pitch => <div className={pitch % 12 === 0 ? 'key c' : 'key'} style={{ height: noteRow }} key={pitch}>{pitch % 12 === 0 ? `C${Math.floor(pitch / 12) - 1}` : ''}</div>)}</div>
+    {scoreTab === 'score' && <SheetMusicView clip={clip} cursorBeat={(currentBeat ?? 0) - clipStartBeat} />}
+    <div className="piano-body" style={scoreTab === 'score' ? { display: 'none' } : undefined}>
+      <div className="keys">{pitches.map(pitch => { const oct = pitch % 12; const isBlack = [1, 3, 6, 8, 10].includes(oct); const isC = oct === 0; return <div className={`key${isBlack ? ' black' : ''}${isC ? ' c' : ''}`} style={{ height: noteRow }} key={pitch} onMouseDown={event => { event.preventDefault(); onPreviewNote?.(pitch); }} onMouseUp={() => onStopPreviewNote?.(pitch)} onMouseLeave={() => onStopPreviewNote?.(pitch)}>{isC ? `C${Math.floor(pitch / 12) - 1}` : ''}</div>; })}</div>
       <div className={`note-area tool-${tool}`} style={{ width, height: pitches.length * noteRow, backgroundSize: `${pxPerBeat}px 100%,100% ${noteRow}px` }} onMouseDown={startNoteMarquee} onDoubleClick={onCanvasDoubleClick} onWheel={event => {
         if (event.altKey && !event.ctrlKey && !event.metaKey) {
           event.preventDefault();
@@ -1589,6 +1693,95 @@ function NewProjectDialog({ value, onChange, onCancel, onCreate }: { value: { ti
   </div>;
 }
 
+const KEY_PIANO_MAP: Record<string, number> = {
+  'a': 0, 'w': 1, 's': 2, 'e': 3, 'd': 4, 'f': 5, 't': 6, 'g': 7, 'y': 8, 'h': 9, 'u': 10, 'j': 11,
+  'k': 12, 'o': 13, 'l': 14, 'p': 15, ';': 16
+};
+const BLACK_KEY_CHARS = new Set(['w', 'e', 't', 'y', 'u', 'o', 'p']);
+
+function KeyInputPanel({ preset, onPreviewNote, onStopPreviewNote, onClose }: {
+  preset: Record<string, unknown>;
+  onPreviewNote: (pitch: number, preset: Record<string, unknown>, velocity: number) => void;
+  onStopPreviewNote: (pitch: number) => void;
+  onClose: () => void;
+}) {
+  const [octave, setOctave] = React.useState(4);
+  const [velocity, setVelocity] = React.useState(80);
+  const [activeKeys, setActiveKeys] = React.useState<Set<string>>(new Set());
+  const octaveRef = React.useRef(octave);
+  const velocityRef = React.useRef(velocity);
+  octaveRef.current = octave;
+  velocityRef.current = velocity;
+
+  React.useEffect(() => {
+    const pressed = new Set<string>();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat) return;
+      const key = event.key.toLowerCase();
+      if (key === 'escape') { onClose(); return; }
+      if (key === 'z') { setOctave(o => Math.max(0, o - 1)); return; }
+      if (key === 'x') { setOctave(o => Math.min(8, o + 1)); return; }
+      if (key === 'c') { setVelocity(v => Math.max(10, v - 10)); return; }
+      if (key === 'v') { setVelocity(v => Math.min(127, v + 10)); return; }
+      const offset = KEY_PIANO_MAP[key];
+      if (offset === undefined) return;
+      event.preventDefault();
+      const pitch = (octaveRef.current + 1) * 12 + offset;
+      if (pressed.has(key)) return;
+      pressed.add(key);
+      setActiveKeys(new Set(pressed));
+      onPreviewNote(pitch, preset, velocityRef.current / 127);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      const offset = KEY_PIANO_MAP[key];
+      if (offset === undefined) return;
+      const pitch = (octaveRef.current + 1) * 12 + offset;
+      pressed.delete(key);
+      setActiveKeys(new Set(pressed));
+      onStopPreviewNote(pitch);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => { window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp); };
+  }, [preset, onPreviewNote, onStopPreviewNote, onClose]);
+
+  const keyRows = [
+    ['a','s','d','f','g','h','j','k','l',';'],
+    ['w','e','','t','y','u','','o','p']
+  ];
+  return <div className="key-input-panel">
+    <div className="key-input-header"><strong>音乐键入</strong><span>⌘K 关闭</span><button onClick={onClose}>✕</button></div>
+    <div className="key-input-keyboard">
+      <div className="key-input-row black-row">{keyRows[1].map((k, i) => k ? <div key={i} className={`ki-key black${activeKeys.has(k) ? ' active' : ''}`}><span>{k.toUpperCase()}</span></div> : <div key={i} className="ki-key spacer" />)}</div>
+      <div className="key-input-row white-row">{keyRows[0].map((k, i) => <div key={i} className={`ki-key white${activeKeys.has(k) ? ' active' : ''}`}><span>{k === ';' ? ';' : k.toUpperCase()}</span></div>)}</div>
+    </div>
+    <div className="key-input-controls">
+      <div className="ki-control"><span>八度</span><button onClick={() => setOctave(o => Math.max(0, o - 1))}>Z −</button><strong>C{octave}</strong><button onClick={() => setOctave(o => Math.min(8, o + 1))}>X +</button></div>
+      <div className="ki-control"><span>力度</span><button onClick={() => setVelocity(v => Math.max(10, v - 10))}>C −</button><strong>{velocity}</strong><button onClick={() => setVelocity(v => Math.min(127, v + 10))}>V +</button></div>
+    </div>
+  </div>;
+}
+
+function ProjectSettingsDialog({ project, onPatch, onClose }: { project: Project; onPatch: (patch: Partial<Pick<Project, 'title' | 'bpm' | 'key' | 'time_signature' | 'length_bars'>>) => void; onClose: () => void }) {
+  return <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal" onClick={event => event.stopPropagation()}>
+      <h2>项目设置</h2>
+      <EditableInput label="标题" value={project.title} onCommit={v => onPatch({ title: v })} />
+      <div className="field-grid">
+        <EditableInput label="BPM" type="number" value={project.bpm} min={40} max={240} onCommit={v => onPatch({ bpm: Number(v) })} />
+        <EditableInput label="长度" type="number" value={project.length_bars} min={1} onCommit={v => onPatch({ length_bars: Number(v) })} />
+      </div>
+      <div className="field-grid">
+        <EditableInput label="拍号" value={project.time_signature} onCommit={v => onPatch({ time_signature: v })} />
+        <EditableInput label="调性" value={project.key} onCommit={v => onPatch({ key: v })} />
+      </div>
+      <div className="meta">{project.tracks.length} 条轨道</div>
+      <div className="button-row"><button onClick={onClose}>关闭</button></div>
+    </div>
+  </div>;
+}
+
 function rectsIntersect(a1: number, a2: number, b1: number, b2: number): boolean {
   return Math.max(a1, b1) <= Math.min(a2, b2);
 }
@@ -1606,8 +1799,34 @@ function nextChannel(project: Project, kind: string): number {
   return 0;
 }
 
+const FALLBACK_PRESET_DISPLAY_NAMES: Record<string, string> = {
+  'SYSTEM/钢琴/piano': 'Chrodis Grand Piano',
+  'SYSTEM/钢琴/soft-piano': 'Soft Studio Piano',
+  'SYSTEM/键盘乐器/keys': 'Classic Keys',
+  'SYSTEM/键盘乐器/electric-keys': 'Electric Bell Keys',
+  'SYSTEM/贝司/bass': 'Round Synth Bass',
+  'SYSTEM/贝司/sub-bass': 'Deep Sub Bass',
+  'SYSTEM/合成器/lead': 'Classic Techno Lead',
+  'SYSTEM/合成器/pluck-lead': 'Plucked Lead',
+  'SYSTEM/音垫/pad': 'Warm Analog Pad',
+  'SYSTEM/管弦乐器/string-pad': 'String Pad',
+  'SYSTEM/吉他/guitar-clean': 'Clean Guitar Approx',
+  'SYSTEM/打击乐器/drum': 'Studio Drum Kit',
+  'SYSTEM/电影音效/fx-pulse': 'Pulse FX',
+  'SYSTEM/合成器/o3-lead': 'O3 Bright Lead',
+  'SYSTEM/贝司/o3-bass': 'O3 Dirty Bass',
+  'SYSTEM/音垫/o3-pad': 'O3 Soft Pad'
+};
+
 function presetDisplayName(library: PresetLibraryData | null, presetName: string): string {
-  return library?.presets.find(preset => preset.name === presetName)?.display_name || presetName || '未选择乐器';
+  if (!presetName) return '未选择乐器';
+  return library?.presets.find(preset => preset.name === presetName)?.display_name || FALLBACK_PRESET_DISPLAY_NAMES[presetName] || '未知预设';
+}
+
+function shouldTrackNameFollowPreset(track: Track, library: PresetLibraryData | null): boolean {
+  if (!track.preset) return track.name === 'New Instrument' || track.name === '未知预设';
+  const presetName = presetDisplayName(library, track.preset);
+  return track.name === presetName || track.name === track.preset || track.name === 'New Instrument' || track.name === '未知预设';
 }
 
 function instrumentInitial(presetName: string): string {
@@ -1624,10 +1843,6 @@ function defaultDeviceLabel(device: MediaDeviceInfo): string {
   if (device.kind === 'audioinput') return '音频输入';
   if (device.kind === 'audiooutput') return '音频输出';
   return '音频设备';
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
 }
 
 createRoot(document.getElementById('root')!).render(<App />);

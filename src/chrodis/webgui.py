@@ -15,6 +15,7 @@ from .composer import compose_mandopop
 from .midi import export_midi
 from .model import AudioClip, Clip, Note, Project, Track
 from .patterns import add_pattern
+from .synth import PresetResolver
 
 
 def run_gui(project_path: Path, port: int = 8765) -> None:
@@ -42,7 +43,9 @@ class ChrodisHandler(BaseHTTPRequestHandler):
         elif path == "/api/project":
             self.send_json(Project.load(self.project_path).to_dict())
         elif path == "/api/presets":
-            self.send_json(json.loads(Path("presets/builtin.json").read_text(encoding="utf-8")))
+            project_dir = self.project_root() / "presets"
+            resolver = PresetResolver(project_dir=project_dir if project_dir.exists() else None)
+            self.send_json({"version": 3, "presets": resolver.all_presets_for_api()})
         elif path.startswith("/assets/"):
             file_path = self.project_root() / path.lstrip("/")
             if file_path.exists():
@@ -171,7 +174,7 @@ class ChrodisHandler(BaseHTTPRequestHandler):
             self.send_json(project.to_dict())
         elif len(parts) == 3 and parts[:2] == ["api", "track"]:
             track = project.tracks[int(parts[2])]
-            for key in ("name", "kind", "channel", "preset", "program", "volume", "pan", "muted", "solo", "record_armed"):
+            for key in ("name", "kind", "channel", "preset", "program", "volume", "pan", "muted", "solo", "record_armed", "synth_params"):
                 if key in data:
                     setattr(track, key, data[key])
             project.save(self.project_path)

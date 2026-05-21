@@ -1,0 +1,71 @@
+.preset-picker {
+  min-width: 0;
+  position: relative;
+  width: 100%;
+}
+
+.preset-picker-button {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  height: 34px;
+  justify-content: space-between;
+  padding: 0 9px;
+  text-align: left;
+  width: 100%;
+}
+
+.preset-picker-button:focus-visible {
+  outline: 2px solid #9dc9ff;
+  outline-offset: 2px;
+}
+
+.preset-picker-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preset-picker-panel {
+  background: #2d333c;
+  border: 1px solid #68717f;
+  border-radius: 6px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.62);
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  height: 360px;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  width: min(520px,84vw);
+  z-index: 260;
+}
+
+.preset-picker-categories,
+.preset-picker-presets {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.preset-picker-categories {
+  background: #333941;
+  border-right: 1px solid #15191f;
+}
+
+.preset-picker-categories button,
+.preset-picker-presets button {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: left;
+}
+
+.preset-picker-presets button {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 48px;
+}

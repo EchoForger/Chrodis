@@ -1,0 +1,32 @@
+{
+  "display_name": "O3 Bright Lead",
+  "description": "明亮的锯齿音 lead，三个振荡器叠加",
+  "synth_engine": "o3",
+  "oscillators": [
+    {
+      "wave": "saw",
+      "ratio": 1.0,
+      "gain": 0.6,
+      "detune_cents": 0
+    },
+    {
+      "wave": "square",
+      "ratio": 1.005,
+      "gain": 0.28,
+      "detune_cents": 7
+    },
+    {
+      "wave": "sine",
+      "ratio": 2.0,
+      "gain": 0.12,
+      "detune_cents": 0
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.008,
+    "decay": 0.2,
+    "sustain": 0.7,
+    "release": 0.08
+  },
+  "output_gain": 0.32
+}

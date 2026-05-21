@@ -1,0 +1,40 @@
+{
+  "display_name": "Round Synth Bass",
+  "description": "圆润、稳定的低频支撑",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "sine",
+      "ratio": 1.0,
+      "gain": 0.75,
+      "detune_cents": 0
+    },
+    {
+      "wave": "square",
+      "ratio": 1.0,
+      "gain": 0.25,
+      "detune_cents": 0
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.003,
+    "decay": 0.12,
+    "sustain": 0.82,
+    "release": 0.04
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 900,
+    "key_tracking": 0.2
+  },
+  "noise": {
+    "type": "none",
+    "gain": 0
+  },
+  "velocity": {
+    "amplitude": 1.15,
+    "brightness": 0.15
+  },
+  "output_gain": 0.42
+}

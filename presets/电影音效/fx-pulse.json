@@ -1,0 +1,41 @@
+{
+  "display_name": "Pulse FX",
+  "description": "短促脉冲和转场点缀",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "square",
+      "ratio": 1.0,
+      "gain": 0.34,
+      "detune_cents": 0
+    },
+    {
+      "wave": "sine",
+      "ratio": 0.5,
+      "gain": 0.32,
+      "detune_cents": 0
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 0.35,
+    "release": 0.22
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 1200,
+    "key_tracking": 0.08
+  },
+  "noise": {
+    "type": "air",
+    "gain": 0.04,
+    "decay": 0.05
+  },
+  "velocity": {
+    "amplitude": 1.0,
+    "brightness": 0.2
+  },
+  "output_gain": 0.28
+}

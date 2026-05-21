@@ -24,11 +24,11 @@ def compose_mandopop(title: str = "晚风里的光", minutes: float = 3.0) -> Pr
         Effect(type="limiter", params={"ceiling_db": -0.8}),
     ]
     project.tracks = [
-        Track(name="Piano", kind="instrument", channel=0, program=0, preset="piano", volume=90, effects=[Effect(type="eq", params={"bands": [{"type": "peaking", "frequency": 350, "gain_db": -2, "q": 1.0}]})]),
-        Track(name="Bass", kind="instrument", channel=1, program=38, preset="bass", volume=86, effects=[Effect(type="compressor", params={"threshold_db": -16, "ratio": 3, "makeup_db": 1})]),
-        Track(name="Pad", kind="instrument", channel=2, program=89, preset="pad", volume=74, effects=[Effect(type="reverb", params={"mix": 0.16, "decay": 0.35})]),
-        Track(name="Lead Melody", kind="instrument", channel=3, program=81, preset="lead", volume=88, effects=[Effect(type="delay", params={"time": 0.24, "feedback": 0.18, "mix": 0.16})]),
-        Track(name="Counter Melody", kind="instrument", channel=4, program=0, preset="keys", volume=76),
+        Track(name="Piano", kind="instrument", channel=0, program=0, preset="钢琴/piano", volume=90, effects=[Effect(type="eq", params={"bands": [{"type": "peaking", "frequency": 350, "gain_db": -2, "q": 1.0}]})]),
+        Track(name="Bass", kind="instrument", channel=1, program=38, preset="贝司/bass", volume=86, effects=[Effect(type="compressor", params={"threshold_db": -16, "ratio": 3, "makeup_db": 1})]),
+        Track(name="Pad", kind="instrument", channel=2, program=89, preset="音垫/pad", volume=74, effects=[Effect(type="reverb", params={"mix": 0.16, "decay": 0.35})]),
+        Track(name="Lead Melody", kind="instrument", channel=3, program=81, preset="合成器/lead", volume=88, effects=[Effect(type="delay", params={"time": 0.24, "feedback": 0.18, "mix": 0.16})]),
+        Track(name="Counter Melody", kind="instrument", channel=4, program=0, preset="键盘乐器/keys", volume=76),
         Track(name="Drums", kind="drum", channel=9, volume=92),
     ]
 

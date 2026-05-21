@@ -73,7 +73,7 @@ def main(argv: list[str] | None = None) -> None:
     wav_parser.add_argument("project")
     wav_parser.add_argument("output")
     wav_parser.add_argument("--sample-rate", type=int, default=44_100)
-    wav_parser.add_argument("--preset-library", default="presets/builtin.json")
+    wav_parser.add_argument("--preset-library", default="presets")
 
     gui_parser = subparsers.add_parser("gui", help="start the local Web GUI")
     gui_parser.add_argument("project")

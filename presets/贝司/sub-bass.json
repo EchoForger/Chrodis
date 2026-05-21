@@ -1,0 +1,40 @@
+{
+  "display_name": "Deep Sub Bass",
+  "description": "更深的 sub 低音",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "sine",
+      "ratio": 0.5,
+      "gain": 0.85,
+      "detune_cents": 0
+    },
+    {
+      "wave": "sine",
+      "ratio": 1.0,
+      "gain": 0.28,
+      "detune_cents": 0
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.01,
+    "decay": 0.18,
+    "sustain": 0.9,
+    "release": 0.08
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 520,
+    "key_tracking": 0.1
+  },
+  "noise": {
+    "type": "none",
+    "gain": 0
+  },
+  "velocity": {
+    "amplitude": 1.05,
+    "brightness": 0.05
+  },
+  "output_gain": 0.5
+}

@@ -1,0 +1,8 @@
+{
+  "inherits": "SYSTEM/贝司/bass",
+  "output_gain": 0.46,
+  "filter.cutoff_hz": 760,
+  "filter.key_tracking": 0.12,
+  "amp_envelope.attack": 0.002,
+  "amp_envelope.release": 0.07
+}

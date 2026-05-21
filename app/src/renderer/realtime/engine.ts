@@ -7,6 +7,8 @@ export class RealtimeAudioEngine {
   private context: AudioContext;
   private node: AudioWorkletNode;
   private onPosition: PositionCallback;
+  private updateVersion = 0;
+  private bufferCache = new Map<string, { sampleRate: number; channels: Float32Array[] }>();
 
   private constructor(context: AudioContext, node: AudioWorkletNode, onPosition: PositionCallback) {
     this.context = context;
@@ -32,8 +34,10 @@ export class RealtimeAudioEngine {
   }
 
   async updateProject(project: Project, presets: PresetLibraryData): Promise<void> {
+    const version = ++this.updateVersion;
     const realtimeProject = buildRealtimeProject(project, presets);
     const audioBuffers = await this.loadAudioBuffers(realtimeProject.audioEvents.map(event => event.assetPath));
+    if (version !== this.updateVersion) return;
     this.node.port.postMessage({ type: 'loadProject', project: realtimeProject, audioBuffers });
   }
 
@@ -58,24 +62,40 @@ export class RealtimeAudioEngine {
     this.node.port.postMessage({ type: 'seek', beat });
   }
 
+  async previewNote(pitch: number, preset: Record<string, unknown>, velocity = 0.8): Promise<void> {
+    await this.context.resume();
+    this.node.port.postMessage({ type: 'previewNote', pitch, preset, velocity });
+  }
+
+  stopPreviewNote(pitch?: number): void {
+    this.node.port.postMessage({ type: 'stopPreviewNote', pitch });
+  }
+
   dispose(): void {
     this.node.port.postMessage({ type: 'stop', beat: 0 });
     this.node.disconnect();
     void this.context.close();
+    this.bufferCache.clear();
   }
 
   private async loadAudioBuffers(paths: string[]): Promise<Record<string, { sampleRate: number; channels: Float32Array[] }>> {
     const unique = Array.from(new Set(paths.filter(Boolean)));
     const buffers: Record<string, { sampleRate: number; channels: Float32Array[] }> = {};
     await Promise.all(unique.map(async path => {
+      if (this.bufferCache.has(path)) {
+        buffers[path] = this.bufferCache.get(path)!;
+        return;
+      }
       const response = await fetch('/' + path);
       if (!response.ok) return;
       const data = await response.arrayBuffer();
       const decoded = await this.context.decodeAudioData(data.slice(0));
-      buffers[path] = {
+      const entry = {
         sampleRate: decoded.sampleRate,
         channels: Array.from({ length: decoded.numberOfChannels }, (_, channel) => new Float32Array(decoded.getChannelData(channel)))
       };
+      this.bufferCache.set(path, entry);
+      buffers[path] = entry;
     }));
     return buffers;
   }

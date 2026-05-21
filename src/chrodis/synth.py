@@ -11,7 +11,8 @@ from .model import Note, Track
 
 
 TAU = math.tau
-DEFAULT_PRESET_LIBRARY = Path("presets/builtin.json")
+DEFAULT_PRESET_LIBRARY = Path("presets")
+RESERVED_PRESET_KEYS = frozenset({"inherits"})
 
 
 @dataclass(frozen=True)
@@ -20,42 +21,150 @@ class SynthPreset:
     data: dict[str, Any]
 
 
-class PresetLibrary:
-    def __init__(self, presets: dict[str, SynthPreset]):
-        self.presets = presets
+def normalize_synth_engine(value: Any) -> str:
+    engine = str(value or "chordsynth").lower()
+    if engine in {"chrodsynth", "csynth"}:
+        return "chordsynth"
+    return engine
 
-    @classmethod
-    def load(cls, path: Path = DEFAULT_PRESET_LIBRARY) -> "PresetLibrary":
-        if not path.exists():
-            raise FileNotFoundError(f"preset library not found: {path}")
-        data = json.loads(path.read_text(encoding="utf-8"))
-        presets = {}
-        for item in data.get("presets", []):
-            name = str(item["name"])
-            presets[name] = SynthPreset(name=name, data=item)
-        return cls(presets)
 
-    def get(self, name: str) -> SynthPreset:
-        try:
-            return self.presets[name]
-        except KeyError as exc:
-            available = ", ".join(sorted(self.presets))
-            raise KeyError(f"preset not found: {name}; available presets: {available}") from exc
-
-    def preset_for_track(self, track: Track) -> SynthPreset:
-        return self.get(track.preset or fallback_preset_name(track.program))
+def is_plain_dict(value: Any) -> bool:
+    return isinstance(value, dict)
 
 
 def fallback_preset_name(program: int | None) -> str:
     if program is None:
-        return "keys"
+        return "SYSTEM/键盘乐器/keys"
     if 32 <= program <= 39:
-        return "bass"
+        return "SYSTEM/贝司/bass"
     if 80 <= program <= 87:
-        return "lead"
+        return "SYSTEM/合成器/lead"
     if 88 <= program <= 95:
-        return "pad"
-    return "keys"
+        return "SYSTEM/音垫/pad"
+    return "SYSTEM/键盘乐器/keys"
+
+
+def resolve_preset_file_path(ref: str, system_dir: Path, user_dir: Path | None, project_dir: Path | None) -> Path:
+    if ref.startswith("SYSTEM/"):
+        return system_dir / (ref[len("SYSTEM/"):] + ".json")
+    if ref.startswith("USER/"):
+        if user_dir is None:
+            raise FileNotFoundError(f"USER preset directory not configured: {ref!r}")
+        return user_dir / (ref[len("USER/"):] + ".json")
+    if ref.startswith("PROJECT/"):
+        if project_dir is None:
+            raise FileNotFoundError(f"PROJECT preset directory not configured: {ref!r}")
+        return project_dir / (ref[len("PROJECT/"):] + ".json")
+    raise ValueError(f"Preset reference must start with SYSTEM/, USER/, or PROJECT/: {ref!r}")
+
+
+def apply_dot_overrides(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+    """Apply dot-notation override keys on top of base. Returns a new dict; does not mutate base."""
+    result = dict(base)
+    for key, value in overrides.items():
+        parts = key.split(".")
+        if len(parts) == 1:
+            result[key] = value
+        else:
+            *parents, leaf = parts
+            obj = result
+            for part in parents:
+                child = obj.get(part)
+                obj[part] = dict(child) if isinstance(child, dict) else {}
+                obj = obj[part]
+            obj[leaf] = value
+    return result
+
+
+def load_and_resolve_preset(
+    ref: str,
+    system_dir: Path,
+    user_dir: Path | None = None,
+    project_dir: Path | None = None,
+    _seen: frozenset[str] = frozenset(),
+) -> dict[str, Any]:
+    if ref in _seen:
+        raise ValueError(f"Circular preset inheritance detected: {ref!r}")
+    path = resolve_preset_file_path(ref, system_dir, user_dir, project_dir)
+    if not path.exists():
+        raise FileNotFoundError(f"Preset not found: {ref!r} (looked in {path})")
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    inherits = raw.get("inherits")
+    overrides = {k: v for k, v in raw.items() if k not in RESERVED_PRESET_KEYS}
+    if inherits:
+        base = load_and_resolve_preset(inherits, system_dir, user_dir, project_dir, _seen | {ref})
+        data = apply_dot_overrides(base, overrides)
+    else:
+        data = apply_dot_overrides({}, overrides)
+    data["name"] = ref
+    data["synth_engine"] = normalize_synth_engine(data.get("synth_engine"))
+    if inherits:
+        data["_inherits"] = inherits
+    return data
+
+
+class PresetResolver:
+    def __init__(
+        self,
+        system_dir: Path = DEFAULT_PRESET_LIBRARY,
+        user_dir: Path | None = None,
+        project_dir: Path | None = None,
+    ):
+        self.system_dir = system_dir
+        self.user_dir = user_dir
+        self.project_dir = project_dir
+
+    @classmethod
+    def for_project(cls, project: Any, system_dir: Path = DEFAULT_PRESET_LIBRARY) -> "PresetResolver":
+        project_dir: Path | None = None
+        if project.source_path is not None:
+            root = project.source_path.parent
+            project_dir = root / "presets"
+        return cls(system_dir=system_dir, project_dir=project_dir)
+
+    def resolve(self, ref: str) -> SynthPreset:
+        data = load_and_resolve_preset(ref, self.system_dir, self.user_dir, self.project_dir)
+        return SynthPreset(name=ref, data=data)
+
+    def preset_for_track(self, track: Any) -> SynthPreset:
+        ref = track.preset or fallback_preset_name(track.program)
+        return self.resolve(ref)
+
+    def all_presets_for_api(self) -> list[dict[str, Any]]:
+        presets: list[dict[str, Any]] = []
+        for level, base_dir in [("SYSTEM", self.system_dir), ("USER", self.user_dir), ("PROJECT", self.project_dir)]:
+            if not base_dir or not base_dir.exists():
+                continue
+            for item_path in sorted(base_dir.rglob("*.json")):
+                rel = str(item_path.relative_to(base_dir).with_suffix("")).replace("\\", "/")
+                ref = f"{level}/{rel}"
+                try:
+                    data = load_and_resolve_preset(ref, self.system_dir, self.user_dir, self.project_dir)
+                    presets.append(data)
+                except Exception:
+                    pass
+        return presets
+
+
+# Keep old name for audio.py compatibility
+PresetLibrary = PresetResolver
+
+
+def deep_merge_preset(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for key, value in overrides.items():
+        current = merged.get(key)
+        if is_plain_dict(current) and is_plain_dict(value):
+            merged[key] = deep_merge_preset(current, value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def load_preset_library_data(path: Path = DEFAULT_PRESET_LIBRARY) -> dict[str, Any]:
+    """Load all SYSTEM presets from a directory. Used by the API endpoint."""
+    resolver = PresetResolver(system_dir=path)
+    return {"version": 3, "presets": resolver.all_presets_for_api()}
 
 
 def render_note(preset: SynthPreset, note: Note, duration: float, sample_rate: int) -> np.ndarray:

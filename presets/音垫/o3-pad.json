@@ -1,0 +1,32 @@
+{
+  "display_name": "O3 Soft Pad",
+  "description": "柔和的 O3 铺底音色",
+  "synth_engine": "o3",
+  "oscillators": [
+    {
+      "wave": "sine",
+      "ratio": 1.0,
+      "gain": 0.5,
+      "detune_cents": 0
+    },
+    {
+      "wave": "triangle",
+      "ratio": 1.5,
+      "gain": 0.3,
+      "detune_cents": 4
+    },
+    {
+      "wave": "sine",
+      "ratio": 0.5,
+      "gain": 0.2,
+      "detune_cents": -2
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.15,
+    "decay": 0.4,
+    "sustain": 0.7,
+    "release": 0.45
+  },
+  "output_gain": 0.3
+}

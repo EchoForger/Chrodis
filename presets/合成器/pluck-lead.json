@@ -1,0 +1,40 @@
+{
+  "display_name": "Plucked Lead",
+  "description": "短促、明亮的旋律音色",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "saw",
+      "ratio": 1.0,
+      "gain": 0.48,
+      "detune_cents": -6
+    },
+    {
+      "wave": "triangle",
+      "ratio": 2.0,
+      "gain": 0.22,
+      "detune_cents": 4
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.002,
+    "decay": 0.18,
+    "sustain": 0.15,
+    "release": 0.08
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 4600,
+    "key_tracking": 0.12
+  },
+  "noise": {
+    "type": "none",
+    "gain": 0
+  },
+  "velocity": {
+    "amplitude": 1.25,
+    "brightness": 0.4
+  },
+  "output_gain": 0.32
+}

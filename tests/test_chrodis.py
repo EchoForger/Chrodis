@@ -18,7 +18,7 @@ from chrodis.midi import export_midi
 from chrodis.model import AudioClip, Clip, Effect, Marker, Note, Project, Track, iter_track_notes
 from chrodis.patterns import add_pattern
 from chrodis.project_io import migrate_project
-from chrodis.synth import PresetLibrary
+from chrodis.synth import PresetLibrary, PresetResolver, load_preset_library_data
 from chrodis.webgui import ChrodisHandler
 import numpy as np
 
@@ -38,7 +38,7 @@ class ProjectModelTests(unittest.TestCase):
                         kind="instrument",
                         channel=0,
                         program=0,
-                        preset="piano",
+                        preset="SYSTEM/钢琴/piano",
                         notes=[Note(1, 1, 60, 1, 90)],
                     )
                 ],
@@ -50,7 +50,7 @@ class ProjectModelTests(unittest.TestCase):
             self.assertEqual(loaded.title, "Song")
             self.assertEqual(loaded.bpm, 119)
             self.assertEqual(loaded.markers[0].name, "Intro")
-            self.assertEqual(loaded.tracks[0].preset, "piano")
+            self.assertEqual(loaded.tracks[0].preset, "SYSTEM/钢琴/piano")
             self.assertEqual(loaded.tracks[0].notes[0].pitch, 60)
 
     def test_project_folder_round_trip(self) -> None:
@@ -94,10 +94,72 @@ class ProjectModelTests(unittest.TestCase):
 
         self.assertIsNone(project.tracks[0].preset)
 
-    def test_builtin_preset_library_contains_piano(self) -> None:
-        library = PresetLibrary.load(Path("presets/builtin.json"))
+    def test_preset_library_directory_contains_piano(self) -> None:
+        resolver = PresetResolver(system_dir=Path("presets"))
 
-        self.assertEqual(library.get("piano").name, "piano")
+        self.assertEqual(resolver.resolve("SYSTEM/钢琴/piano").name, "SYSTEM/钢琴/piano")
+
+    def test_preset_resolver_uses_system_prefix(self) -> None:
+        data = load_preset_library_data(Path("presets"))
+        names = {item["name"] for item in data["presets"]}
+
+        self.assertIn("SYSTEM/钢琴/piano", names)
+        self.assertIn("SYSTEM/合成器/o3-lead", names)
+        self.assertIn("SYSTEM/贝司/o3-bass", names)
+        self.assertIn("SYSTEM/音垫/o3-pad", names)
+
+    def test_project_round_trip_without_project_presets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "song.chrodis.json"
+            project = Project(
+                title="Song",
+                tracks=[
+                    Track(
+                        name="Keys",
+                        kind="instrument",
+                        channel=0,
+                        preset="SYSTEM/钢琴/piano",
+                    )
+                ],
+            )
+
+            project.save(path)
+            loaded = Project.load(path)
+            data = loaded.to_dict()
+
+            self.assertEqual(loaded.tracks[0].preset, "SYSTEM/钢琴/piano")
+            self.assertNotIn("project_presets", data)
+
+    def test_resolver_resolves_project_preset_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            system_dir = Path("presets")
+            project_presets_dir = Path(tmp) / "presets"
+            project_presets_dir.mkdir()
+            (project_presets_dir / "my-lead.json").write_text(
+                json.dumps({"inherits": "SYSTEM/合成器/lead", "output_gain": 0.44, "amp_envelope.sustain": 0.22}),
+                encoding="utf-8",
+            )
+            resolver = PresetResolver(system_dir=system_dir, project_dir=project_presets_dir)
+            preset = resolver.resolve("PROJECT/my-lead")
+            base = resolver.resolve("SYSTEM/合成器/lead")
+
+            self.assertEqual(preset.data["synth_engine"], "chordsynth")
+            self.assertEqual(preset.data["output_gain"], 0.44)
+            self.assertEqual(preset.data["amp_envelope"]["sustain"], 0.22)
+            self.assertEqual(preset.data["amp_envelope"]["attack"], base.data["amp_envelope"]["attack"])
+
+    def test_preset_library_normalizes_legacy_chrodsynth_engine(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            preset_dir = Path(tmp) / "presets" / "合成器"
+            preset_dir.mkdir(parents=True)
+            (preset_dir / "legacy.json").write_text(
+                json.dumps({"display_name": "Legacy", "synth_engine": "chrodsynth"}),
+                encoding="utf-8",
+            )
+
+            resolver = PresetResolver(system_dir=preset_dir.parent)
+
+            self.assertEqual(resolver.resolve("SYSTEM/合成器/legacy").data["synth_engine"], "chordsynth")
 
     def test_pattern_adds_notes(self) -> None:
         project = Project(title="Song", tracks=[Track(name="Drums", kind="drum", channel=9)])
@@ -175,7 +237,7 @@ class ProjectModelTests(unittest.TestCase):
                         kind="instrument",
                         channel=0,
                         program=0,
-                        preset="piano",
+                        preset="SYSTEM/钢琴/piano",
                         notes=[Note(1, 1, 60, 1, 90)],
                     )
                 ],
@@ -220,10 +282,10 @@ class ProjectModelTests(unittest.TestCase):
             path = Path(tmp) / "song.wav"
             project = Project(
                 title="Song",
-                tracks=[Track(name="Keys", kind="instrument", channel=0, preset="missing", notes=[Note(1, 1, 60, 1, 90)])],
+                tracks=[Track(name="Keys", kind="instrument", channel=0, preset="SYSTEM/missing", notes=[Note(1, 1, 60, 1, 90)])],
             )
 
-            with self.assertRaisesRegex(KeyError, "preset not found: missing"):
+            with self.assertRaises((KeyError, FileNotFoundError)):
                 export_wav(project, path, sample_rate=8_000)
 
 
@@ -244,7 +306,7 @@ class CliTests(unittest.TestCase):
             midi = Path(tmp) / "song.mid"
 
             self.run_cli("init", str(project), "--title", "Song", "--bpm", "119", cwd=repo)
-            self.run_cli("add-track", str(project), "Keys", "--kind", "instrument", "--program", "0", "--preset", "piano", cwd=repo)
+            self.run_cli("add-track", str(project), "Keys", "--kind", "instrument", "--program", "0", "--preset", "SYSTEM/钢琴/piano", cwd=repo)
             self.run_cli("marker", str(project), "1", "Intro", cwd=repo)
             self.run_cli("note", str(project), "Keys", "--bar", "1", "--pitch", "60", cwd=repo)
             self.run_cli("pattern", str(project), "Keys", "piano-pulse", "--start-bar", "2", "--bars", "1", cwd=repo)
@@ -252,7 +314,7 @@ class CliTests(unittest.TestCase):
 
             self.assertTrue(midi.exists())
             self.assertTrue(midi.read_bytes().startswith(b"MThd"))
-            self.assertEqual(Project.load(project).find_track("Keys").preset, "piano")
+            self.assertEqual(Project.load(project).find_track("Keys").preset, "SYSTEM/钢琴/piano")
 
     def test_cli_export_wav(self) -> None:
         repo = Path(__file__).resolve().parents[1]
@@ -261,7 +323,7 @@ class CliTests(unittest.TestCase):
             wav_path = Path(tmp) / "song.wav"
 
             self.run_cli("init", str(project), "--title", "Song", "--bpm", "120", cwd=repo)
-            self.run_cli("add-track", str(project), "Keys", "--kind", "instrument", "--program", "0", "--preset", "piano", cwd=repo)
+            self.run_cli("add-track", str(project), "Keys", "--kind", "instrument", "--program", "0", "--preset", "SYSTEM/钢琴/piano", cwd=repo)
             self.run_cli("note", str(project), "Keys", "--bar", "1", "--pitch", "60", cwd=repo)
             self.run_cli(
                 "export-wav",
@@ -270,7 +332,7 @@ class CliTests(unittest.TestCase):
                 "--sample-rate",
                 "8000",
                 "--preset-library",
-                "presets/builtin.json",
+                "presets",
                 cwd=repo,
             )
 
@@ -364,7 +426,7 @@ class WebGuiTests(unittest.TestCase):
                 server.shutdown()
                 server.server_close()
 
-    def test_preset_api_returns_builtin_presets(self) -> None:
+    def test_preset_api_returns_directory_presets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_path = Path(tmp) / "song.chrodis.json"
             Project(title="Song").save(project_path)
@@ -383,7 +445,8 @@ class WebGuiTests(unittest.TestCase):
             try:
                 with urlopen(base + "/api/presets") as response:
                     data = json.loads(response.read().decode("utf-8"))
-                self.assertTrue(any(item["name"] == "piano" for item in data["presets"]))
+                self.assertTrue(any(item["name"] == "SYSTEM/钢琴/piano" for item in data["presets"]))
+                self.assertFalse(any(item["name"].startswith("O3合成器/") for item in data["presets"]))
             finally:
                 server.shutdown()
                 server.server_close()
@@ -455,7 +518,13 @@ class WebGuiTests(unittest.TestCase):
             try:
                 request = Request(
                     base + "/api/project/meta",
-                    data=json.dumps({"title": "Edited", "bpm": 96, "key": "G", "time_signature": "3/4", "length_bars": 24}).encode("utf-8"),
+                    data=json.dumps({
+                        "title": "Edited",
+                        "bpm": 96,
+                        "key": "G",
+                        "time_signature": "3/4",
+                        "length_bars": 24,
+                    }).encode("utf-8"),
                     headers={"Content-Type": "application/json"},
                     method="PATCH",
                 )

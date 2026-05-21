@@ -1,0 +1,619 @@
+{
+  "title": "Mandopop Sketch",
+  "bpm": 88,
+  "key": "C",
+  "time_signature": "4/4",
+  "length_bars": 32,
+  "markers": [
+    {
+      "bar": 1.0,
+      "name": "Intro"
+    },
+    {
+      "bar": 9.0,
+      "name": "Verse"
+    },
+    {
+      "bar": 17.0,
+      "name": "Chorus"
+    },
+    {
+      "bar": 25.0,
+      "name": "Outro"
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Chrodis Grand Piano",
+      "kind": "instrument",
+      "channel": 0,
+      "volume": 102,
+      "pan": 64,
+      "muted": false,
+      "solo": true,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "room": 0.32,
+            "mix": 0.18
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "clip-piano-melody",
+          "name": "主旋律",
+          "bar": 1.0,
+          "beats": 8.0,
+          "color": "#4aa3ff",
+          "loop_count": 4,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 64,
+              "duration": 1.0,
+              "velocity": 96
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 69,
+              "duration": 1.0,
+              "velocity": 94
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 90
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 2.0,
+              "velocity": 98
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 71,
+              "duration": 1.0,
+              "velocity": 88
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 69,
+              "duration": 1.0,
+              "velocity": 90
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 64,
+              "duration": 1.0,
+              "velocity": 88
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 65,
+              "duration": 1.0,
+              "velocity": 90
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 69,
+              "duration": 2.0,
+              "velocity": 96
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 67,
+              "duration": 2.0,
+              "velocity": 86
+            },
+            {
+              "bar": 5.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 1.0,
+              "velocity": 98
+            },
+            {
+              "bar": 5.0,
+              "beat": 2.0,
+              "pitch": 74,
+              "duration": 1.0,
+              "velocity": 96
+            },
+            {
+              "bar": 5.0,
+              "beat": 3.0,
+              "pitch": 76,
+              "duration": 1.0,
+              "velocity": 100
+            },
+            {
+              "bar": 5.0,
+              "beat": 4.0,
+              "pitch": 74,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 6.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 2.0,
+              "velocity": 94
+            },
+            {
+              "bar": 6.0,
+              "beat": 3.0,
+              "pitch": 69,
+              "duration": 1.0,
+              "velocity": 88
+            },
+            {
+              "bar": 6.0,
+              "beat": 4.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 86
+            },
+            {
+              "bar": 7.0,
+              "beat": 1.0,
+              "pitch": 65,
+              "duration": 1.0,
+              "velocity": 88
+            },
+            {
+              "bar": 7.0,
+              "beat": 2.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 90
+            },
+            {
+              "bar": 7.0,
+              "beat": 3.0,
+              "pitch": 69,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 7.0,
+              "beat": 4.0,
+              "pitch": 71,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 8.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 4.0,
+              "velocity": 102
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "id": "piano",
+      "preset": "PROJECT/piano"
+    },
+    {
+      "name": "钢琴（主旋律）",
+      "kind": "instrument",
+      "channel": 1,
+      "volume": 82,
+      "pan": 38,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "room": 0.22,
+            "mix": 0.12
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "clip-guitar-chords",
+          "name": "和弦扫弦",
+          "bar": 1.0,
+          "beats": 16.0,
+          "color": "#33b07a",
+          "loop_count": 2,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 48,
+              "duration": 3.5,
+              "velocity": 72
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.25,
+              "pitch": 52,
+              "duration": 3.25,
+              "velocity": 68
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.5,
+              "pitch": 55,
+              "duration": 3.0,
+              "velocity": 70
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.75,
+              "pitch": 60,
+              "duration": 2.75,
+              "velocity": 66
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 55,
+              "duration": 0.5,
+              "velocity": 76
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.5,
+              "pitch": 60,
+              "duration": 0.5,
+              "velocity": 74
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 45,
+              "duration": 3.5,
+              "velocity": 70
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.25,
+              "pitch": 48,
+              "duration": 3.25,
+              "velocity": 66
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.5,
+              "pitch": 52,
+              "duration": 3.0,
+              "velocity": 68
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.75,
+              "pitch": 57,
+              "duration": 2.75,
+              "velocity": 64
+            },
+            {
+              "bar": 5.0,
+              "beat": 1.0,
+              "pitch": 41,
+              "duration": 3.5,
+              "velocity": 70
+            },
+            {
+              "bar": 5.0,
+              "beat": 1.25,
+              "pitch": 45,
+              "duration": 3.25,
+              "velocity": 66
+            },
+            {
+              "bar": 5.0,
+              "beat": 1.5,
+              "pitch": 48,
+              "duration": 3.0,
+              "velocity": 68
+            },
+            {
+              "bar": 5.0,
+              "beat": 1.75,
+              "pitch": 52,
+              "duration": 2.75,
+              "velocity": 64
+            },
+            {
+              "bar": 7.0,
+              "beat": 1.0,
+              "pitch": 43,
+              "duration": 3.5,
+              "velocity": 72
+            },
+            {
+              "bar": 7.0,
+              "beat": 1.25,
+              "pitch": 47,
+              "duration": 3.25,
+              "velocity": 68
+            },
+            {
+              "bar": 7.0,
+              "beat": 1.5,
+              "pitch": 50,
+              "duration": 3.0,
+              "velocity": 70
+            },
+            {
+              "bar": 7.0,
+              "beat": 1.75,
+              "pitch": 55,
+              "duration": 2.75,
+              "velocity": 66
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "id": "piano-melody",
+      "preset": "SYSTEM/合成器/lead"
+    },
+    {
+      "name": "",
+      "kind": "drum",
+      "channel": 9,
+      "volume": 108,
+      "pan": 64,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [],
+      "notes": [],
+      "clips": [
+        {
+          "id": "clip-drums",
+          "name": "基础鼓组",
+          "bar": 1.0,
+          "beats": 4.0,
+          "color": "#e08a38",
+          "loop_count": 32,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 112
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 76
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 82
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 76
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 106
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 78
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 100
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 80
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "id": "drums",
+      "preset": "PROJECT/drums"
+    },
+    {
+      "name": "Bass",
+      "kind": "instrument",
+      "channel": 2,
+      "volume": 96,
+      "pan": 64,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "threshold_db": -16,
+            "ratio": 3.2
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "clip-bass",
+          "name": "根音贝司",
+          "bar": 1.0,
+          "beats": 8.0,
+          "color": "#8f79ff",
+          "loop_count": 4,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 1.5,
+              "velocity": 98
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 36,
+              "duration": 0.75,
+              "velocity": 86
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 33,
+              "duration": 1.5,
+              "velocity": 96
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 33,
+              "duration": 0.75,
+              "velocity": 84
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 33,
+              "duration": 1.0,
+              "velocity": 90
+            },
+            {
+              "bar": 5.0,
+              "beat": 1.0,
+              "pitch": 29,
+              "duration": 1.5,
+              "velocity": 96
+            },
+            {
+              "bar": 5.0,
+              "beat": 3.0,
+              "pitch": 29,
+              "duration": 0.75,
+              "velocity": 84
+            },
+            {
+              "bar": 6.0,
+              "beat": 1.0,
+              "pitch": 31,
+              "duration": 1.0,
+              "velocity": 90
+            },
+            {
+              "bar": 7.0,
+              "beat": 1.0,
+              "pitch": 31,
+              "duration": 1.5,
+              "velocity": 96
+            },
+            {
+              "bar": 7.0,
+              "beat": 3.0,
+              "pitch": 31,
+              "duration": 0.75,
+              "velocity": 84
+            },
+            {
+              "bar": 8.0,
+              "beat": 1.0,
+              "pitch": 35,
+              "duration": 1.0,
+              "velocity": 94
+            },
+            {
+              "bar": 8.0,
+              "beat": 3.0,
+              "pitch": 35,
+              "duration": 1.0,
+              "velocity": 88
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "id": "bass",
+      "preset": "PROJECT/bass"
+    }
+  ],
+  "master_effects": [
+    {
+      "type": "limiter",
+      "enabled": true,
+      "params": {
+        "ceiling_db": -1
+      }
+    }
+  ]
+}

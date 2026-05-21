@@ -12,7 +12,7 @@ PYTHONPATH=src python3 -m chrodis.cli add-track projects/poker-face.chrodis.json
 PYTHONPATH=src python3 -m chrodis.cli marker projects/poker-face.chrodis.json 1 Intro
 PYTHONPATH=src python3 -m chrodis.cli pattern projects/poker-face.chrodis.json "Piano Pulse" piano-pulse --start-bar 1 --bars 8
 PYTHONPATH=src python3 -m chrodis.cli export-midi projects/poker-face.chrodis.json exports/headless/poker-face-headless.mid
-PYTHONPATH=src python3 -m chrodis.cli export-wav projects/poker-face.chrodis.json exports/headless/poker-face-headless.wav --preset-library presets/builtin.json
+PYTHONPATH=src python3 -m chrodis.cli export-wav projects/poker-face.chrodis.json exports/headless/poker-face-headless.wav --preset-library presets
 PYTHONPATH=src python3 -m chrodis.cli compose mandopop projects/mandopop-3min.chrodis.json --title "晚风里的光" --minutes 3
 PYTHONPATH=src python3 -m chrodis.cli gui projects/mandopop-3min.chrodis.json --port 8765
 PYTHONPATH=src python3 -m chrodis.cli migrate projects/mandopop-3min.chrodis.json projects/mandopop-3min.chrodis
@@ -27,7 +27,7 @@ chrodis info projects/poker-face.chrodis.json
 
 `export-wav` 使用 JSON 预设驱动的内置合成器离线渲染，不需要 Logic 或第三方音源。轨道可以用 `--preset piano` 指定音色；如果旧工程没有 preset，普通轨道会按 MIDI program 回退到 keys/bass/lead/pad，鼓轨继续合成 kick、snare、hat。
 
-内置预设保存在 `presets/builtin.json`，其中包含 `piano` 合成钢琴预设。
+内置预设保存在 `presets/` 目录下，并按乐器分类分成多个 JSON 文件。
 
 ## Chrodis 桌面界面
 

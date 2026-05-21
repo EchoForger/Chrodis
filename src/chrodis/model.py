@@ -157,6 +157,8 @@ class Track:
     notes: list[Note] = field(default_factory=list)
     clips: list[Clip] = field(default_factory=list)
     audio_clips: list[AudioClip] = field(default_factory=list)
+    synth_params: dict[str, Any] | None = None
+    id: str = ""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Track":
@@ -175,6 +177,8 @@ class Track:
             notes=[Note.from_dict(item) for item in data.get("notes", [])],
             clips=[Clip.from_dict(item) for item in data.get("clips", [])],
             audio_clips=[AudioClip.from_dict(item) for item in data.get("audio_clips", [])],
+            synth_params=data.get("synth_params"),
+            id=str(data.get("id", "")),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -192,10 +196,14 @@ class Track:
             "clips": [clip.to_dict() for clip in self.clips],
             "audio_clips": [clip.to_dict() for clip in self.audio_clips],
         }
+        if self.id:
+            data["id"] = self.id
         if self.program is not None:
             data["program"] = self.program
         if self.preset is not None:
             data["preset"] = self.preset
+        if self.synth_params is not None:
+            data["synth_params"] = self.synth_params
         return data
 
 

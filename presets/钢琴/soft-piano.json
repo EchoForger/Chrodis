@@ -1,0 +1,45 @@
+{
+  "display_name": "Soft Studio Piano",
+  "description": "更柔和的钢琴层，适合伴奏",
+  "type": "subtractive",
+  "synth_engine": "chordsynth",
+  "oscillators": [
+    {
+      "wave": "sine",
+      "ratio": 1.0,
+      "gain": 0.9,
+      "detune_cents": 0,
+      "decay": 2.2
+    },
+    {
+      "wave": "sine",
+      "ratio": 2.0,
+      "gain": 0.3,
+      "detune_cents": 1,
+      "decay": 1.3
+    }
+  ],
+  "amp_envelope": {
+    "attack": 0.006,
+    "decay": 1.1,
+    "sustain": 0.08,
+    "release": 0.32,
+    "curve": "exponential"
+  },
+  "filter": {
+    "type": "lowpass",
+    "cutoff_hz": 4300,
+    "key_tracking": 0.3
+  },
+  "noise": {
+    "type": "hammer",
+    "gain": 0.035,
+    "decay": 0.012
+  },
+  "velocity": {
+    "amplitude": 1.3,
+    "brightness": 0.35
+  },
+  "tail_seconds": 1.1,
+  "output_gain": 0.48
+}

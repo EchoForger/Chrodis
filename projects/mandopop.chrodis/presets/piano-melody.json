@@ -1,0 +1,7 @@
+{
+  "inherits": "SYSTEM/钢琴/piano",
+  "output_gain": 0.5,
+  "filter.cutoff_hz": 6200,
+  "filter.key_tracking": 0.45,
+  "amp_envelope.release": 0.28
+}

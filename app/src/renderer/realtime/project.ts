@@ -3,7 +3,6 @@ import { type Note, type Project, type Track } from '../api';
 export type PresetData = {
   name: string;
   display_name?: string;
-  category?: string;
   description?: string;
   [key: string]: unknown;
 };
@@ -17,6 +16,7 @@ export type RealtimeTrack = {
   pan: number;
   muted: boolean;
   solo: boolean;
+  synthParams?: Record<string, unknown>;
 };
 
 export type RealtimeEvent = {
@@ -53,7 +53,8 @@ export function buildRealtimeProject(project: Project, library: PresetLibraryDat
     volume: track.volume,
     pan: track.pan,
     muted: track.muted,
-    solo: track.solo
+    solo: track.solo,
+    synthParams: track.synth_params ?? undefined
   }));
   const events = project.tracks.flatMap((track, trackIndex) => flattenTrackEvents(track, trackIndex));
   const audioEvents = project.tracks.flatMap((track, trackIndex) => flattenAudioEvents(track, trackIndex));
@@ -122,9 +123,9 @@ export function secondsToBeat(seconds: number, bpm: number): number {
 
 function fallbackPreset(track: Track): string {
   const program = 'program' in track ? (track as Track & { program?: number }).program : undefined;
-  if (program === undefined || program === null) return 'keys';
-  if (program >= 32 && program <= 39) return 'bass';
-  if (program >= 80 && program <= 87) return 'lead';
-  if (program >= 88 && program <= 95) return 'pad';
-  return 'keys';
+  if (program === undefined || program === null) return 'SYSTEM/键盘乐器/keys';
+  if (program >= 32 && program <= 39) return 'SYSTEM/贝司/bass';
+  if (program >= 80 && program <= 87) return 'SYSTEM/合成器/lead';
+  if (program >= 88 && program <= 95) return 'SYSTEM/音垫/pad';
+  return 'SYSTEM/键盘乐器/keys';
 }

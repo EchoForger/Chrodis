@@ -1,0 +1,54 @@
+.control-range {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0 !important;
+  cursor: pointer;
+  padding: 0 !important;
+}
+
+.control-range:focus-visible,
+.knob:focus-visible {
+  outline: 2px solid #9dc9ff;
+  outline-offset: 2px;
+}
+
+.control-range.horizontal {
+  height: 18px;
+  width: 100%;
+}
+
+.control-range.vertical {
+  direction: rtl;
+  height: 92%;
+  width: 22px;
+  writing-mode: vertical-lr;
+}
+
+.control-range::-webkit-slider-runnable-track {
+  background: #252a30;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.55);
+  height: 10px;
+}
+
+.control-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: linear-gradient(#aaa,#777);
+  border: 1px solid #c4c8ce;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,.5);
+  height: 20px;
+  margin-top: -5px;
+  width: 20px;
+}
+
+.control-range.vertical::-webkit-slider-runnable-track {
+  height: 100%;
+  width: 10px;
+}
+
+.control-range.vertical::-webkit-slider-thumb {
+  margin-left: -5px;
+  margin-top: 0;
+}

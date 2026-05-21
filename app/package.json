@@ -31,6 +31,10 @@
     ],
     "extraResources": [
       {
+        "from": "../presets",
+        "to": "presets"
+      },
+      {
         "from": "../projects/mandopop-3min.chrodis",
         "to": "projects/mandopop-3min.chrodis"
       }

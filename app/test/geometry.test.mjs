@@ -130,6 +130,69 @@ function midiThumbnailNotes(notes, clipBeats, loopCount = 1) {
   return output;
 }
 
+function presetEngine(preset) {
+  return normalizeSynthEngine(preset.synth_engine);
+}
+
+function normalizeSynthEngine(value) {
+  const engine = String(value || 'chordsynth').toLowerCase();
+  if (engine === 'chrodsynth' || engine === 'csynth') return 'chordsynth';
+  return engine;
+}
+
+function presetCategories(presets) {
+  return [...new Set(presets.map(preset => String(preset.category || '其他')))];
+}
+
+function filterPresetsByEngine(presets, engine) {
+  return presets.filter(preset => presetEngine(preset) === normalizeSynthEngine(engine));
+}
+
+function deepMergePreset(base, overrides) {
+  const merged = { ...base };
+  for (const [key, value] of Object.entries(overrides)) {
+    const current = merged[key];
+    merged[key] = current && value && typeof current === 'object' && typeof value === 'object' && !Array.isArray(current) && !Array.isArray(value)
+      ? deepMergePreset(current, value)
+      : value;
+  }
+  return merged;
+}
+
+function resolveLibraryWithProjectPresets(library, projectPresets) {
+  if (!projectPresets?.length) return library;
+  const systemMap = Object.fromEntries(library.presets.map(preset => [preset.name, preset]));
+  const resolved = projectPresets.map(projectPreset => {
+    const base = systemMap[projectPreset.inherits] || {};
+    const data = deepMergePreset(base, projectPreset.overrides || {});
+    return {
+      ...data,
+      name: projectPreset.name,
+      display_name: projectPreset.display_name || projectPreset.name,
+      category: projectPreset.category || '工程预设',
+      synth_engine: normalizeSynthEngine(data.synth_engine)
+    };
+  });
+  return { ...library, presets: [...library.presets, ...resolved] };
+}
+
+function sheetCursorX(cursorBeat, clipBeats) {
+  return 96 + Math.max(0, Math.min(clipBeats, cursorBeat)) * 56;
+}
+
+function sheetCursorLabel(cursorBeat, clipBeats) {
+  const safeBeat = Math.max(0, Math.min(clipBeats, cursorBeat));
+  return `${String(Math.floor(safeBeat / 4) + 1).padStart(3, '0')}:${Math.floor(safeBeat % 4) + 1}`;
+}
+
+function controlAngle(value, min, max, center) {
+  const start = 135;
+  const range = 270;
+  if (center !== undefined && value === center) return start + range / 2;
+  const norm = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  return start + norm * range;
+}
+
 test('clip geometry helpers', () => {
   assert.equal(clipLeft(5, 80), 320);
   assert.equal(clipWidth(8, 80), 160);
@@ -239,6 +302,46 @@ test('midi thumbnails handle empty and narrow clips', () => {
   const [note] = midiThumbnailNotes([{ bar: 1, beat: 1, pitch: 64, duration: 0.1, velocity: 90 }], 32);
   assert.equal(note.leftPct, 0);
   assert.ok(note.widthPct >= 1.2);
+});
+
+test('preset categories follow instrument groups, not synth engines', () => {
+  const presets = [
+    { name: 'lead', category: '合成器', synth_engine: 'chrodsynth' },
+    { name: 'o3-lead', category: '合成器', synth_engine: 'o3' },
+    { name: 'o3-bass', category: '贝司', synth_engine: 'o3' }
+  ];
+  assert.deepEqual(presetCategories(presets), ['合成器', '贝司']);
+  assert.equal(filterPresetsByEngine(presets, 'o3').length, 2);
+  assert.equal(presetCategories(filterPresetsByEngine(presets, 'o3')).includes('O3合成器'), false);
+});
+
+test('project presets inherit base data then deeply apply overrides', () => {
+  const library = { presets: [{ name: 'lead', display_name: 'Lead', category: '合成器', synth_engine: 'chrodsynth', output_gain: 0.2, amp_envelope: { attack: 0.01, decay: 0.2, sustain: 0.7 } }] };
+  const resolved = resolveLibraryWithProjectPresets(library, [{ name: 'my-lead', inherits: 'lead', overrides: { output_gain: 0.5, amp_envelope: { sustain: 0.4 } } }]);
+  const preset = resolved.presets.find(item => item.name === 'my-lead');
+  assert.equal(preset.category, '工程预设');
+  assert.equal(preset.synth_engine, 'chordsynth');
+  assert.equal(preset.output_gain, 0.5);
+  assert.deepEqual(preset.amp_envelope, { attack: 0.01, decay: 0.2, sustain: 0.4 });
+});
+
+test('synth engine aliases normalize for filtering', () => {
+  assert.equal(normalizeSynthEngine('chrodsynth'), 'chordsynth');
+  assert.equal(normalizeSynthEngine('csynth'), 'chordsynth');
+  assert.equal(normalizeSynthEngine('o3'), 'o3');
+  assert.equal(filterPresetsByEngine([{ name: 'old', synth_engine: 'chrodsynth' }], 'chordsynth').length, 1);
+});
+
+test('control angle maps pan endpoints and center exactly', () => {
+  assert.equal(controlAngle(0, 0, 127, 64), 135);
+  assert.equal(controlAngle(64, 0, 127, 64), 270);
+  assert.equal(controlAngle(127, 0, 127, 64), 405);
+});
+
+test('sheet music cursor uses clamped beat position and bar:beat label', () => {
+  assert.equal(sheetCursorX(2, 8), 208);
+  assert.equal(sheetCursorX(99, 8), 544);
+  assert.equal(sheetCursorLabel(5, 8), '002:2');
 });
 
 function flattenTrackEvents(track, trackIndex) {

@@ -1,0 +1,29 @@
+.sheet-music-wrap {
+  background: #d8d8d2;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+
+.sheet-music-wrap canvas {
+  display: block;
+}
+
+.sheet-music-status {
+  background: rgba(20,24,30,.84);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 4px;
+  color: #f3f5f8;
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  left: 10px;
+  line-height: 18px;
+  margin-bottom: -28px;
+  padding: 4px 8px;
+  pointer-events: none;
+  position: sticky;
+  top: 8px;
+  z-index: 3;
+}

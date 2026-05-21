@@ -7,7 +7,7 @@ import wave
 
 from .effects import apply_effects
 from .model import AudioClip, Note, Project, Track, iter_track_notes, renderable_tracks
-from .synth import DEFAULT_PRESET_LIBRARY, PresetLibrary, render_note
+from .synth import DEFAULT_PRESET_LIBRARY, PresetResolver, render_note
 
 
 DEFAULT_SAMPLE_RATE = 44_100
@@ -21,13 +21,13 @@ def export_wav(
     preset_library_path: Path = DEFAULT_PRESET_LIBRARY,
 ) -> None:
     """Render a project to a stereo 16-bit PCM WAV using JSON-backed synth presets."""
-    preset_library = PresetLibrary.load(preset_library_path)
-    total_seconds = project_duration_seconds(project, preset_library)
+    resolver = PresetResolver.for_project(project, system_dir=preset_library_path)
+    total_seconds = project_duration_seconds(project, resolver)
     total_frames = max(1, math.ceil(total_seconds * sample_rate))
     mix = np.zeros((total_frames, 2), dtype=np.float64)
 
     for track in renderable_tracks(project):
-        mix += render_track(project, track, total_frames, sample_rate, preset_library)
+        mix += render_track(project, track, total_frames, sample_rate, resolver)
 
     mix = apply_effects(mix, project.master_effects, sample_rate)
     mix = normalize(mix)
@@ -39,7 +39,7 @@ def render_track(
     track: Track,
     total_frames: int,
     sample_rate: int,
-    preset_library: PresetLibrary,
+    preset_library: PresetResolver,
 ) -> np.ndarray:
     buffer = np.zeros((total_frames, 2), dtype=np.float64)
     gain = (track.volume / 127.0) ** 1.5
@@ -98,7 +98,7 @@ def render_instrument(
     sample_rate: int,
     left_gain: float,
     right_gain: float,
-    preset_library: PresetLibrary,
+    preset_library: PresetResolver,
 ) -> None:
     start_frame = max(0, round(start * sample_rate))
     samples = render_note(preset_library.preset_for_track(track), note, duration, sample_rate)
@@ -144,7 +144,7 @@ def drum_sample(pitch: int, t):
     return np.sin(TAU * midi_to_hz(pitch) * t) * np.exp(-t * 16) * 0.25
 
 
-def project_duration_seconds(project: Project, preset_library: PresetLibrary | None = None) -> float:
+def project_duration_seconds(project: Project, preset_library: PresetResolver | None = None) -> float:
     latest = 4.0
     for track in project.tracks:
         tail_seconds = 0.0
