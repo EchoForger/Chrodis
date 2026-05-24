@@ -1,7 +1,10 @@
 {
   "inherits": "SYSTEM/钢琴/piano",
   "output_gain": 0.5,
-  "filter.cutoff_hz": 6200,
-  "filter.key_tracking": 0.45,
+  "oscillators": [
+    { "wave": "sine", "ratio": 1.0, "gain": 0.72, "detune_cents": 0 },
+    { "wave": "triangle", "ratio": 2.0, "gain": 0.3, "detune_cents": 1 },
+    { "wave": "sine", "ratio": 3.0, "gain": 0.08, "detune_cents": 4 }
+  ],
   "amp_envelope.release": 0.28
 }

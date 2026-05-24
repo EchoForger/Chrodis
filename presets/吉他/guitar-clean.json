@@ -1,47 +1,13 @@
 {
-  "display_name": "Clean Guitar Approx",
-  "description": "拨弦包络的干净吉他近似",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Clean Guitar",
+  "description": "用 O3 模拟的干净拨弦音色",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "triangle",
-      "ratio": 1.0,
-      "gain": 0.58,
-      "detune_cents": 0
-    },
-    {
-      "wave": "sine",
-      "ratio": 2.0,
-      "gain": 0.25,
-      "detune_cents": 2
-    },
-    {
-      "wave": "saw",
-      "ratio": 1.0,
-      "gain": 0.12,
-      "detune_cents": -3
-    }
+    { "wave": "triangle", "ratio": 1.0, "gain": 0.54, "detune_cents": 0 },
+    { "wave": "sine", "ratio": 2.0, "gain": 0.22, "detune_cents": 2 },
+    { "wave": "square", "ratio": 1.0, "gain": 0.08, "detune_cents": -7 }
   ],
-  "amp_envelope": {
-    "attack": 0.003,
-    "decay": 0.36,
-    "sustain": 0.25,
-    "release": 0.15
-  },
-  "filter": {
-    "type": "lowpass",
-    "cutoff_hz": 3600,
-    "key_tracking": 0.18
-  },
-  "noise": {
-    "type": "pick",
-    "gain": 0.025,
-    "decay": 0.01
-  },
-  "velocity": {
-    "amplitude": 1.25,
-    "brightness": 0.35
-  },
-  "output_gain": 0.3
+  "amp_envelope": { "attack": 0.003, "decay": 0.24, "sustain": 0.38, "release": 0.12 },
+  "tail_seconds": 0.18,
+  "output_gain": 0.34
 }

@@ -1,59 +1,13 @@
 {
-  "display_name": "Chrodis Grand Piano",
-  "description": "明亮、带敲击感的合成钢琴",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Glass Piano",
+  "description": "O3 三发声装置钢琴类音色",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "sine",
-      "ratio": 1.0,
-      "gain": 1.0,
-      "detune_cents": 0,
-      "decay": 1.8
-    },
-    {
-      "wave": "sine",
-      "ratio": 2.003,
-      "gain": 0.46,
-      "detune_cents": -1,
-      "decay": 0.9
-    },
-    {
-      "wave": "sine",
-      "ratio": 3.01,
-      "gain": 0.26,
-      "detune_cents": 2,
-      "decay": 0.55
-    },
-    {
-      "wave": "sine",
-      "ratio": 4.018,
-      "gain": 0.16,
-      "detune_cents": -2,
-      "decay": 0.35
-    }
+    { "wave": "sine", "ratio": 1.0, "gain": 0.72, "detune_cents": 0 },
+    { "wave": "triangle", "ratio": 2.0, "gain": 0.24, "detune_cents": 1 },
+    { "wave": "sine", "ratio": 3.0, "gain": 0.08, "detune_cents": -2 }
   ],
-  "amp_envelope": {
-    "attack": 0.002,
-    "decay": 0.9,
-    "sustain": 0.0,
-    "release": 0.18,
-    "curve": "exponential"
-  },
-  "filter": {
-    "type": "lowpass",
-    "cutoff_hz": 6800,
-    "key_tracking": 0.45
-  },
-  "noise": {
-    "type": "hammer",
-    "gain": 0.09,
-    "decay": 0.014
-  },
-  "velocity": {
-    "amplitude": 1.55,
-    "brightness": 0.75
-  },
-  "tail_seconds": 0.85,
-  "output_gain": 0.56
+  "amp_envelope": { "attack": 0.004, "decay": 0.32, "sustain": 0.48, "release": 0.16 },
+  "tail_seconds": 0.22,
+  "output_gain": 0.42
 }

@@ -1,0 +1,314 @@
+{
+  "title": "O3 Simple Sketch",
+  "bpm": 104,
+  "key": "C",
+  "time_signature": "4/4",
+  "length_bars": 8,
+  "markers": [
+    {
+      "bar": 1.0,
+      "name": "O3 Demo"
+    }
+  ],
+  "tracks": [
+    {
+      "name": "O3 Lead",
+      "kind": "instrument",
+      "channel": 0,
+      "volume": 94,
+      "pan": 64,
+      "muted": false,
+      "solo": true,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "time": 0.22,
+            "feedback": 0.16,
+            "mix": 0.12
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "o3-lead-hook",
+          "name": "Lead Hook",
+          "bar": 1.0,
+          "beats": 8.0,
+          "color": "#35b7ff",
+          "loop_count": 3,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 64,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.5,
+              "pitch": 67,
+              "duration": 0.5,
+              "velocity": 92
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 72,
+              "duration": 1.0,
+              "velocity": 104
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 71,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.5,
+              "pitch": 69,
+              "duration": 0.5,
+              "velocity": 92
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 96
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 64,
+              "duration": 1.0,
+              "velocity": 94
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 76,
+              "duration": 1.5,
+              "velocity": 106
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/合成器/lead",
+      "synth_params": {
+        "oscillators": [
+          {
+            "wave": "saw",
+            "ratio": 1,
+            "gain": 0.52,
+            "detune_cents": 0
+          },
+          {
+            "wave": "sine",
+            "ratio": 1,
+            "gain": 0.28,
+            "detune_cents": 6
+          },
+          {
+            "wave": "sine",
+            "ratio": 2,
+            "gain": 0.12,
+            "detune_cents": -4
+          }
+        ]
+      }
+    },
+    {
+      "name": "O3 Bass",
+      "kind": "instrument",
+      "channel": 1,
+      "volume": 92,
+      "pan": 58,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "threshold_db": -16,
+            "ratio": 2.8,
+            "makeup_db": 1
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "o3-bass-line",
+          "name": "Bass Line",
+          "bar": 1.0,
+          "beats": 8.0,
+          "color": "#55c66d",
+          "loop_count": 1,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 1.0,
+              "velocity": 102
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 36,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.5,
+              "pitch": 43,
+              "duration": 0.5,
+              "velocity": 92
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 48,
+              "duration": 1.0,
+              "velocity": 98
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 43,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 41,
+              "duration": 1.0,
+              "velocity": 96
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 43,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 48,
+              "duration": 2.0,
+              "velocity": 100
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/贝司/o3-bass"
+    },
+    {
+      "name": "O3 Pad",
+      "kind": "instrument",
+      "channel": 2,
+      "volume": 78,
+      "pan": 72,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": 0.22,
+            "decay": 0.45
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "o3-pad-chords",
+          "name": "Pad Chords",
+          "bar": 1.0,
+          "beats": 8.0,
+          "color": "#9b7cff",
+          "loop_count": 1,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 48,
+              "duration": 4.0,
+              "velocity": 70
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 52,
+              "duration": 4.0,
+              "velocity": 66
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 55,
+              "duration": 4.0,
+              "velocity": 68
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 53,
+              "duration": 4.0,
+              "velocity": 70
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 57,
+              "duration": 4.0,
+              "velocity": 66
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 60,
+              "duration": 4.0,
+              "velocity": 68
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/音垫/o3-pad"
+    }
+  ],
+  "master_effects": [
+    {
+      "type": "limiter",
+      "enabled": true,
+      "params": {
+        "ceiling_db": -1
+      }
+    }
+  ]
+}

@@ -18,8 +18,8 @@ export function synthSampleO3(voice) {
   const env = ampEnvelopeO3(preset, t, voice.durationSeconds, voice.totalSeconds);
   const velocityAmp = Math.pow(voice.velocity, 1.1);
   let value = 0;
-  const oscillators = Array.isArray(preset.oscillators) ? preset.oscillators : [];
-  for (let i = 0; i < Math.min(3, oscillators.length); i++) {
+  const oscillators = o3Oscillators(preset);
+  for (let i = 0; i < 3; i++) {
     const osc = oscillators[i];
     const ratio = numberOr(1, osc.ratio);
     const detune = Math.pow(2, numberOr(0, osc.detune_cents) / 1200);
@@ -29,6 +29,16 @@ export function synthSampleO3(voice) {
     voice.phases[i] = (phase + frequency / sampleRate) % 1;
   }
   return value * env * velocityAmp * outputGain;
+}
+
+function o3Oscillators(preset) {
+  const oscillators = Array.isArray(preset.oscillators) ? preset.oscillators : [];
+  const defaults = [
+    { wave: 'sine', ratio: 1, gain: 1, detune_cents: 0 },
+    { wave: 'sine', ratio: 2, gain: 0, detune_cents: 0 },
+    { wave: 'sine', ratio: 0.5, gain: 0, detune_cents: 0 }
+  ];
+  return defaults.map((osc, index) => ({ ...osc, ...(oscillators[index] || {}) }));
 }
 
 function ampEnvelopeO3(preset, t, durationSeconds, totalSeconds) {

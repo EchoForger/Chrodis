@@ -136,30 +136,30 @@ class ProjectModelTests(unittest.TestCase):
             project_presets_dir = Path(tmp) / "presets"
             project_presets_dir.mkdir()
             (project_presets_dir / "my-lead.json").write_text(
-                json.dumps({"inherits": "SYSTEM/合成器/lead", "output_gain": 0.44, "amp_envelope.sustain": 0.22}),
+                json.dumps({"inherits": "SYSTEM/合成器/o3-lead", "output_gain": 0.44, "amp_envelope.sustain": 0.22}),
                 encoding="utf-8",
             )
             resolver = PresetResolver(system_dir=system_dir, project_dir=project_presets_dir)
             preset = resolver.resolve("PROJECT/my-lead")
-            base = resolver.resolve("SYSTEM/合成器/lead")
+            base = resolver.resolve("SYSTEM/合成器/o3-lead")
 
-            self.assertEqual(preset.data["synth_engine"], "chordsynth")
+            self.assertEqual(preset.data["synth_engine"], "o3")
             self.assertEqual(preset.data["output_gain"], 0.44)
             self.assertEqual(preset.data["amp_envelope"]["sustain"], 0.22)
             self.assertEqual(preset.data["amp_envelope"]["attack"], base.data["amp_envelope"]["attack"])
 
-    def test_preset_library_normalizes_legacy_chrodsynth_engine(self) -> None:
+    def test_preset_library_normalizes_any_engine_to_o3(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             preset_dir = Path(tmp) / "presets" / "合成器"
             preset_dir.mkdir(parents=True)
             (preset_dir / "legacy.json").write_text(
-                json.dumps({"display_name": "Legacy", "synth_engine": "chrodsynth"}),
+                json.dumps({"display_name": "Legacy", "synth_engine": "anything"}),
                 encoding="utf-8",
             )
 
             resolver = PresetResolver(system_dir=preset_dir.parent)
 
-            self.assertEqual(resolver.resolve("SYSTEM/合成器/legacy").data["synth_engine"], "chordsynth")
+            self.assertEqual(resolver.resolve("SYSTEM/合成器/legacy").data["synth_engine"], "o3")
 
     def test_pattern_adds_notes(self) -> None:
         project = Project(title="Song", tracks=[Track(name="Drums", kind="drum", channel=9)])

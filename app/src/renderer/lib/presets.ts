@@ -1,18 +1,15 @@
 import { type PresetData, type PresetLibraryData } from '../realtime/project';
 
-export type SynthEngine = 'chordsynth' | 'o3' | string;
+export type SynthEngine = 'o3';
 
 export function normalizeSynthEngine(value: unknown): SynthEngine {
-  const engine = String(value || 'chordsynth').toLowerCase();
-  if (engine === 'chrodsynth' || engine === 'csynth') return 'chordsynth';
-  return engine;
+  return String(value || 'o3').toLowerCase() === 'o3' ? 'o3' : 'o3';
 }
 
 export function synthEngineLabel(value: unknown): string {
   const engine = normalizeSynthEngine(value);
   if (engine === 'o3') return 'O3';
-  if (engine === 'chordsynth') return 'CSynth';
-  return engine;
+  return 'O3';
 }
 
 export function presetEngine(preset: PresetData | Record<string, unknown>): SynthEngine {
@@ -61,4 +58,3 @@ export function deepMergePreset(base: Record<string, unknown>, overrides: Record
   }
   return merged;
 }
-

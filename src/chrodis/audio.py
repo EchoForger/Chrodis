@@ -7,7 +7,7 @@ import wave
 
 from .effects import apply_effects
 from .model import AudioClip, Note, Project, Track, iter_track_notes, renderable_tracks
-from .synth import DEFAULT_PRESET_LIBRARY, PresetResolver, render_note
+from .synth import DEFAULT_PRESET_LIBRARY, PresetResolver, SynthPreset, deep_merge_preset, render_note
 
 
 DEFAULT_SAMPLE_RATE = 44_100
@@ -101,7 +101,10 @@ def render_instrument(
     preset_library: PresetResolver,
 ) -> None:
     start_frame = max(0, round(start * sample_rate))
-    samples = render_note(preset_library.preset_for_track(track), note, duration, sample_rate)
+    preset = preset_library.preset_for_track(track)
+    if track.synth_params:
+        preset = SynthPreset(name=preset.name, data=deep_merge_preset(preset.data, track.synth_params))
+    samples = render_note(preset, note, duration, sample_rate)
     end_frame = min(buffer.shape[0], start_frame + len(samples))
     count = max(0, end_frame - start_frame)
     if count:

@@ -1,4 +1,3 @@
-import { synthSample } from './synths/chordsynth.js';
 import { synthSampleO3 } from './synths/o3.js';
 
 const TAU = Math.PI * 2;
@@ -157,9 +156,7 @@ class ChrodisWorklet extends AudioWorkletProcessor {
     let right = 0;
     const survivors = [];
     for (const voice of this.voices) {
-      const sample = voice.kind === 'drum' ? drumSample(voice)
-        : voice.preset.synth_engine === 'o3' ? synthSampleO3(voice)
-        : synthSample(voice);
+      const sample = voice.kind === 'drum' ? drumSample(voice) : synthSampleO3(voice);
       left += sample * voice.leftGain;
       right += sample * voice.rightGain;
       voice.ageSamples += 1;

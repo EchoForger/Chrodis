@@ -528,7 +528,7 @@ function App() {
 
   async function addTrack(kind: 'instrument' | 'drum' | 'audio' = 'instrument') {
     mutateProject(draft => {
-      const preset = kind === 'audio' ? undefined : 'SYSTEM/钢琴/piano';
+      const preset = kind === 'audio' ? undefined : 'SYSTEM/合成器/o3-lead';
       draft.tracks.push({
         name: kind === 'audio' ? 'Audio Track' : presetDisplayName(effectivePresets, preset || ''),
         kind,
@@ -1804,11 +1804,8 @@ const FALLBACK_PRESET_DISPLAY_NAMES: Record<string, string> = {
   'SYSTEM/钢琴/soft-piano': 'Soft Studio Piano',
   'SYSTEM/键盘乐器/keys': 'Classic Keys',
   'SYSTEM/键盘乐器/electric-keys': 'Electric Bell Keys',
-  'SYSTEM/贝司/bass': 'Round Synth Bass',
   'SYSTEM/贝司/sub-bass': 'Deep Sub Bass',
-  'SYSTEM/合成器/lead': 'Classic Techno Lead',
   'SYSTEM/合成器/pluck-lead': 'Plucked Lead',
-  'SYSTEM/音垫/pad': 'Warm Analog Pad',
   'SYSTEM/管弦乐器/string-pad': 'String Pad',
   'SYSTEM/吉他/guitar-clean': 'Clean Guitar Approx',
   'SYSTEM/打击乐器/drum': 'Studio Drum Kit',

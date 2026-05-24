@@ -1,40 +1,13 @@
 {
-  "display_name": "Plucked Lead",
-  "description": "短促、明亮的旋律音色",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Pluck Lead",
+  "description": "短促、有颗粒感的 O3 主奏音色",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "saw",
-      "ratio": 1.0,
-      "gain": 0.48,
-      "detune_cents": -6
-    },
-    {
-      "wave": "triangle",
-      "ratio": 2.0,
-      "gain": 0.22,
-      "detune_cents": 4
-    }
+    { "wave": "square", "ratio": 1.0, "gain": 0.5, "detune_cents": 0 },
+    { "wave": "triangle", "ratio": 2.0, "gain": 0.22, "detune_cents": 7 },
+    { "wave": "sine", "ratio": 3.0, "gain": 0.1, "detune_cents": -5 }
   ],
-  "amp_envelope": {
-    "attack": 0.002,
-    "decay": 0.18,
-    "sustain": 0.15,
-    "release": 0.08
-  },
-  "filter": {
-    "type": "lowpass",
-    "cutoff_hz": 4600,
-    "key_tracking": 0.12
-  },
-  "noise": {
-    "type": "none",
-    "gain": 0
-  },
-  "velocity": {
-    "amplitude": 1.25,
-    "brightness": 0.4
-  },
-  "output_gain": 0.32
+  "amp_envelope": { "attack": 0.002, "decay": 0.14, "sustain": 0.28, "release": 0.06 },
+  "tail_seconds": 0.1,
+  "output_gain": 0.36
 }

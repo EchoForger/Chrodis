@@ -1,40 +1,13 @@
 {
-  "display_name": "Round Synth Bass",
-  "description": "圆润、稳定的低频支撑",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Round Bass",
+  "description": "圆润的 O3 合成贝司",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "sine",
-      "ratio": 1.0,
-      "gain": 0.75,
-      "detune_cents": 0
-    },
-    {
-      "wave": "square",
-      "ratio": 1.0,
-      "gain": 0.25,
-      "detune_cents": 0
-    }
+    { "wave": "sine", "ratio": 1.0, "gain": 0.74, "detune_cents": 0 },
+    { "wave": "square", "ratio": 0.5, "gain": 0.22, "detune_cents": -4 },
+    { "wave": "triangle", "ratio": 1.0, "gain": 0.12, "detune_cents": 5 }
   ],
-  "amp_envelope": {
-    "attack": 0.003,
-    "decay": 0.12,
-    "sustain": 0.82,
-    "release": 0.04
-  },
-  "filter": {
-    "type": "lowpass",
-    "cutoff_hz": 900,
-    "key_tracking": 0.2
-  },
-  "noise": {
-    "type": "none",
-    "gain": 0
-  },
-  "velocity": {
-    "amplitude": 1.15,
-    "brightness": 0.15
-  },
-  "output_gain": 0.42
+  "amp_envelope": { "attack": 0.004, "decay": 0.16, "sustain": 0.78, "release": 0.08 },
+  "tail_seconds": 0.12,
+  "output_gain": 0.4
 }

@@ -1,46 +1,13 @@
 {
-  "display_name": "Warm Analog Pad",
-  "description": "宽、暖的背景铺底",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Warm Pad",
+  "description": "温暖舒展的 O3 铺底音色",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "sine",
-      "ratio": 1.0,
-      "gain": 0.48,
-      "detune_cents": 0
-    },
-    {
-      "wave": "sine",
-      "ratio": 1.5,
-      "gain": 0.28,
-      "detune_cents": 2
-    },
-    {
-      "wave": "saw",
-      "ratio": 0.5,
-      "gain": 0.18,
-      "detune_cents": -3
-    }
+    { "wave": "sine", "ratio": 1.0, "gain": 0.46, "detune_cents": -5 },
+    { "wave": "triangle", "ratio": 1.5, "gain": 0.32, "detune_cents": 5 },
+    { "wave": "sine", "ratio": 0.5, "gain": 0.22, "detune_cents": 0 }
   ],
-  "amp_envelope": {
-    "attack": 0.12,
-    "decay": 0.35,
-    "sustain": 0.76,
-    "release": 0.4
-  },
-  "filter": {
-    "type": "lowpass",
-    "cutoff_hz": 1800,
-    "key_tracking": 0.1
-  },
-  "noise": {
-    "type": "none",
-    "gain": 0
-  },
-  "velocity": {
-    "amplitude": 0.95,
-    "brightness": 0.1
-  },
+  "amp_envelope": { "attack": 0.22, "decay": 0.5, "sustain": 0.72, "release": 0.65 },
+  "tail_seconds": 0.7,
   "output_gain": 0.3
 }

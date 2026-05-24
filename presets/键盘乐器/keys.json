@@ -1,38 +1,13 @@
 {
-  "display_name": "Classic Keys",
-  "description": "干净的电钢琴/键盘基础音色",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Classic Keys",
+  "description": "干净的 O3 基础键盘音色",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "sine",
-      "ratio": 1.0,
-      "gain": 0.8,
-      "detune_cents": 0
-    },
-    {
-      "wave": "sine",
-      "ratio": 2.0,
-      "gain": 0.2,
-      "detune_cents": 0
-    }
+    { "wave": "sine", "ratio": 1.0, "gain": 0.7, "detune_cents": 0 },
+    { "wave": "sine", "ratio": 2.0, "gain": 0.2, "detune_cents": 0 },
+    { "wave": "triangle", "ratio": 1.0, "gain": 0.12, "detune_cents": 4 }
   ],
-  "amp_envelope": {
-    "attack": 0.006,
-    "decay": 0.25,
-    "sustain": 0.7,
-    "release": 0.06
-  },
-  "filter": {
-    "type": "none"
-  },
-  "noise": {
-    "type": "none",
-    "gain": 0
-  },
-  "velocity": {
-    "amplitude": 1.2,
-    "brightness": 0.0
-  },
-  "output_gain": 0.35
+  "amp_envelope": { "attack": 0.006, "decay": 0.22, "sustain": 0.66, "release": 0.08 },
+  "tail_seconds": 0.16,
+  "output_gain": 0.36
 }

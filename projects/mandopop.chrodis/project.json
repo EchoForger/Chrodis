@@ -394,7 +394,7 @@
       ],
       "audio_clips": [],
       "id": "piano-melody",
-      "preset": "SYSTEM/合成器/lead"
+      "preset": "SYSTEM/合成器/o3-lead"
     },
     {
       "name": "",
@@ -476,13 +476,7 @@
         }
       ],
       "audio_clips": [],
-      "id": "drums",
-      "preset": "SYSTEM/吉他/guitar-clean",
-      "synth_params": {
-        "filter": {
-          "type": "lowpass"
-        }
-      }
+      "id": "drums"
     },
     {
       "name": "Bass",

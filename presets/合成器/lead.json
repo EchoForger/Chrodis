@@ -1,46 +1,13 @@
 {
-  "display_name": "Classic Techno Lead",
-  "description": "清晰的 saw lead",
-  "type": "subtractive",
-  "synth_engine": "chordsynth",
+  "display_name": "O3 Classic Lead",
+  "description": "直接明亮的 O3 主奏音色",
+  "synth_engine": "o3",
   "oscillators": [
-    {
-      "wave": "saw",
-      "ratio": 1.0,
-      "gain": 0.58,
-      "detune_cents": -4
-    },
-    {
-      "wave": "saw",
-      "ratio": 1.0,
-      "gain": 0.38,
-      "detune_cents": 5
-    },
-    {
-      "wave": "sine",
-      "ratio": 2.0,
-      "gain": 0.16,
-      "detune_cents": 0
-    }
+    { "wave": "saw", "ratio": 1.0, "gain": 0.52, "detune_cents": 0 },
+    { "wave": "square", "ratio": 1.0, "gain": 0.28, "detune_cents": 6 },
+    { "wave": "sine", "ratio": 2.0, "gain": 0.12, "detune_cents": -4 }
   ],
-  "amp_envelope": {
-    "attack": 0.004,
-    "decay": 0.08,
-    "sustain": 0.86,
-    "release": 0.08
-  },
-  "filter": {
-    "type": "lowpass",
-    "cutoff_hz": 3600,
-    "key_tracking": 0.15
-  },
-  "noise": {
-    "type": "none",
-    "gain": 0
-  },
-  "velocity": {
-    "amplitude": 1.2,
-    "brightness": 0.25
-  },
-  "output_gain": 0.28
+  "amp_envelope": { "attack": 0.006, "decay": 0.18, "sustain": 0.74, "release": 0.1 },
+  "tail_seconds": 0.18,
+  "output_gain": 0.32
 }

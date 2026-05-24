@@ -135,9 +135,7 @@ function presetEngine(preset) {
 }
 
 function normalizeSynthEngine(value) {
-  const engine = String(value || 'chordsynth').toLowerCase();
-  if (engine === 'chrodsynth' || engine === 'csynth') return 'chordsynth';
-  return engine;
+  return String(value || 'o3').toLowerCase() === 'o3' ? 'o3' : 'o3';
 }
 
 function presetCategories(presets) {
@@ -306,30 +304,29 @@ test('midi thumbnails handle empty and narrow clips', () => {
 
 test('preset categories follow instrument groups, not synth engines', () => {
   const presets = [
-    { name: 'lead', category: '合成器', synth_engine: 'chrodsynth' },
+    { name: 'lead', category: '合成器', synth_engine: 'o3' },
     { name: 'o3-lead', category: '合成器', synth_engine: 'o3' },
     { name: 'o3-bass', category: '贝司', synth_engine: 'o3' }
   ];
   assert.deepEqual(presetCategories(presets), ['合成器', '贝司']);
-  assert.equal(filterPresetsByEngine(presets, 'o3').length, 2);
+  assert.equal(filterPresetsByEngine(presets, 'o3').length, 3);
   assert.equal(presetCategories(filterPresetsByEngine(presets, 'o3')).includes('O3合成器'), false);
 });
 
 test('project presets inherit base data then deeply apply overrides', () => {
-  const library = { presets: [{ name: 'lead', display_name: 'Lead', category: '合成器', synth_engine: 'chrodsynth', output_gain: 0.2, amp_envelope: { attack: 0.01, decay: 0.2, sustain: 0.7 } }] };
+  const library = { presets: [{ name: 'lead', display_name: 'Lead', category: '合成器', synth_engine: 'o3', output_gain: 0.2, amp_envelope: { attack: 0.01, decay: 0.2, sustain: 0.7 } }] };
   const resolved = resolveLibraryWithProjectPresets(library, [{ name: 'my-lead', inherits: 'lead', overrides: { output_gain: 0.5, amp_envelope: { sustain: 0.4 } } }]);
   const preset = resolved.presets.find(item => item.name === 'my-lead');
   assert.equal(preset.category, '工程预设');
-  assert.equal(preset.synth_engine, 'chordsynth');
+  assert.equal(preset.synth_engine, 'o3');
   assert.equal(preset.output_gain, 0.5);
   assert.deepEqual(preset.amp_envelope, { attack: 0.01, decay: 0.2, sustain: 0.4 });
 });
 
-test('synth engine aliases normalize for filtering', () => {
-  assert.equal(normalizeSynthEngine('chrodsynth'), 'chordsynth');
-  assert.equal(normalizeSynthEngine('csynth'), 'chordsynth');
+test('synth engine values normalize to o3 for filtering', () => {
+  assert.equal(normalizeSynthEngine('anything'), 'o3');
   assert.equal(normalizeSynthEngine('o3'), 'o3');
-  assert.equal(filterPresetsByEngine([{ name: 'old', synth_engine: 'chrodsynth' }], 'chordsynth').length, 1);
+  assert.equal(filterPresetsByEngine([{ name: 'old', synth_engine: 'anything' }], 'o3').length, 1);
 });
 
 test('control angle maps pan endpoints and center exactly', () => {

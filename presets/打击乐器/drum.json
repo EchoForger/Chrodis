@@ -2,30 +2,6 @@
   "display_name": "Studio Drum Kit",
   "description": "内置 kick/snare/hat 合成鼓",
   "type": "drum",
-  "oscillators": [
-    {
-      "wave": "sine",
-      "ratio": 1.0,
-      "gain": 1.0
-    }
-  ],
-  "amp_envelope": {
-    "attack": 0.001,
-    "decay": 0.12,
-    "sustain": 0.0,
-    "release": 0.04
-  },
-  "filter": {
-    "type": "none"
-  },
-  "noise": {
-    "type": "none",
-    "gain": 0
-  },
-  "velocity": {
-    "amplitude": 1.2,
-    "brightness": 0.0
-  },
   "tail_seconds": 0.25,
   "output_gain": 0.55
 }

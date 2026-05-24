@@ -124,8 +124,8 @@ export function secondsToBeat(seconds: number, bpm: number): number {
 function fallbackPreset(track: Track): string {
   const program = 'program' in track ? (track as Track & { program?: number }).program : undefined;
   if (program === undefined || program === null) return 'SYSTEM/键盘乐器/keys';
-  if (program >= 32 && program <= 39) return 'SYSTEM/贝司/bass';
-  if (program >= 80 && program <= 87) return 'SYSTEM/合成器/lead';
-  if (program >= 88 && program <= 95) return 'SYSTEM/音垫/pad';
+  if (program >= 32 && program <= 39) return 'SYSTEM/贝司/o3-bass';
+  if (program >= 80 && program <= 87) return 'SYSTEM/合成器/o3-lead';
+  if (program >= 88 && program <= 95) return 'SYSTEM/音垫/o3-pad';
   return 'SYSTEM/键盘乐器/keys';
 }
