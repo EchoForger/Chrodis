@@ -28,9 +28,9 @@
       "kind": "instrument",
       "channel": 0,
       "volume": 102,
-      "pan": 64,
+      "pan": 70,
       "muted": false,
-      "solo": true,
+      "solo": false,
       "record_armed": false,
       "effects": [
         {
@@ -239,7 +239,7 @@
       "kind": "instrument",
       "channel": 1,
       "volume": 82,
-      "pan": 38,
+      "pan": 69,
       "muted": false,
       "solo": false,
       "record_armed": false,
@@ -403,7 +403,7 @@
       "volume": 108,
       "pan": 64,
       "muted": false,
-      "solo": false,
+      "solo": true,
       "record_armed": false,
       "effects": [],
       "notes": [],
@@ -477,7 +477,12 @@
       ],
       "audio_clips": [],
       "id": "drums",
-      "preset": "PROJECT/drums"
+      "preset": "SYSTEM/吉他/guitar-clean",
+      "synth_params": {
+        "filter": {
+          "type": "lowpass"
+        }
+      }
     },
     {
       "name": "Bass",
