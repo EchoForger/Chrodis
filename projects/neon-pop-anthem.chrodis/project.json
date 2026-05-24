@@ -1,0 +1,1882 @@
+{
+  "title": "Neon Pop Anthem",
+  "bpm": 124,
+  "key": "C minor",
+  "time_signature": "4/4",
+  "length_bars": 80,
+  "markers": [
+    {
+      "bar": 1.0,
+      "name": "Intro"
+    },
+    {
+      "bar": 9.0,
+      "name": "Verse"
+    },
+    {
+      "bar": 25.0,
+      "name": "Pre-Chorus"
+    },
+    {
+      "bar": 33.0,
+      "name": "Chorus"
+    },
+    {
+      "bar": 49.0,
+      "name": "Breakdown"
+    },
+    {
+      "bar": 57.0,
+      "name": "Final Chorus"
+    },
+    {
+      "bar": 73.0,
+      "name": "Outro"
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drumis Arena Beat",
+      "kind": "instrument",
+      "channel": 9,
+      "volume": 96,
+      "pan": 64,
+      "muted": false,
+      "solo": true,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "gate",
+          "enabled": true,
+          "params": {
+            "threshold_db": -48,
+            "range_db": -36,
+            "attack": 0.002,
+            "release": 0.06
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "threshold_db": -14,
+            "ratio": 3.2,
+            "makeup_db": 1.4
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "drumis-intro-pulse",
+          "name": "Intro Pulse",
+          "bar": 1.0,
+          "beats": 16.0,
+          "color": "#ff8f70",
+          "loop_count": 2,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 98
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 58
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 102
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 60
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 100
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 60
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 86
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 46,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 104
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 60
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 104
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 62
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 46,
+              "duration": 0.25,
+              "velocity": 74
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 92
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.5,
+              "pitch": 39,
+              "duration": 0.25,
+              "velocity": 88
+            }
+          ]
+        },
+        {
+          "id": "drumis-main",
+          "name": "Main Four-On-Floor",
+          "bar": 9.0,
+          "beats": 16.0,
+          "color": "#ff624d",
+          "loop_count": 18,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 116
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 68
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 106
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.5,
+              "pitch": 46,
+              "duration": 0.25,
+              "velocity": 82
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 116
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 68
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.5,
+              "pitch": 46,
+              "duration": 0.25,
+              "velocity": 76
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 110
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.5,
+              "pitch": 39,
+              "duration": 0.25,
+              "velocity": 94
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 116
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 108
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 110
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.5,
+              "pitch": 46,
+              "duration": 0.25,
+              "velocity": 84
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 118
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 46,
+              "duration": 0.25,
+              "velocity": 78
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.5,
+              "pitch": 39,
+              "duration": 0.25,
+              "velocity": 90
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 38,
+              "duration": 0.25,
+              "velocity": 112
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.5,
+              "pitch": 42,
+              "duration": 0.25,
+              "velocity": 74
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.0,
+              "pitch": 36,
+              "duration": 0.25,
+              "velocity": 112
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.5,
+              "pitch": 39,
+              "duration": 0.25,
+              "velocity": 98
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/打击乐器/drumis-init"
+    },
+    {
+      "name": "O3 Club Bass",
+      "kind": "instrument",
+      "channel": 1,
+      "volume": 88,
+      "pan": 64,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "eq",
+          "enabled": true,
+          "params": {
+            "bands": [
+              {
+                "type": "low_shelf",
+                "frequency": 90,
+                "gain_db": 3,
+                "q": 0.707
+              },
+              {
+                "type": "peaking",
+                "frequency": 320,
+                "gain_db": -2,
+                "q": 1.1
+              },
+              {
+                "type": "high_shelf",
+                "frequency": 4200,
+                "gain_db": -1,
+                "q": 0.707
+              }
+            ]
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "threshold_db": -16,
+            "ratio": 3.5,
+            "makeup_db": 1
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "o3-bass-verse",
+          "name": "O3 Bass Verse",
+          "bar": 9.0,
+          "beats": 16.0,
+          "color": "#35b779",
+          "loop_count": 4,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 1.5,
+              "velocity": 96
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 36,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 43,
+              "duration": 0.75,
+              "velocity": 88
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 44,
+              "duration": 1.5,
+              "velocity": 94
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 86
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 51,
+              "duration": 0.75,
+              "velocity": 86
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 32,
+              "duration": 1.5,
+              "velocity": 98
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 32,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 39,
+              "duration": 0.75,
+              "velocity": 86
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 41,
+              "duration": 1.0,
+              "velocity": 94
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.5,
+              "pitch": 43,
+              "duration": 0.5,
+              "velocity": 84
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 84
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.0,
+              "pitch": 46,
+              "duration": 0.75,
+              "velocity": 90
+            }
+          ]
+        },
+        {
+          "id": "o3-bass-chorus",
+          "name": "O3 Bass Chorus",
+          "bar": 33.0,
+          "beats": 16.0,
+          "color": "#2ed37f",
+          "loop_count": 3,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.75,
+              "velocity": 108
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 36,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 43,
+              "duration": 0.75,
+              "velocity": 100
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 48,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 44,
+              "duration": 0.75,
+              "velocity": 106
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 51,
+              "duration": 0.75,
+              "velocity": 100
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 56,
+              "duration": 0.5,
+              "velocity": 94
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 32,
+              "duration": 0.75,
+              "velocity": 110
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 32,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 39,
+              "duration": 0.75,
+              "velocity": 100
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 41,
+              "duration": 0.75,
+              "velocity": 106
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 43,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.0,
+              "pitch": 46,
+              "duration": 0.75,
+              "velocity": 102
+            }
+          ]
+        },
+        {
+          "id": "o3-bass-final",
+          "name": "O3 Bass Final",
+          "bar": 57.0,
+          "beats": 16.0,
+          "color": "#2ed37f",
+          "loop_count": 5,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 36,
+              "duration": 0.75,
+              "velocity": 110
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 36,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 43,
+              "duration": 0.75,
+              "velocity": 102
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 48,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 44,
+              "duration": 0.75,
+              "velocity": 108
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 51,
+              "duration": 0.75,
+              "velocity": 102
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 56,
+              "duration": 0.5,
+              "velocity": 96
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 32,
+              "duration": 0.75,
+              "velocity": 112
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 32,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 39,
+              "duration": 0.75,
+              "velocity": 102
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 41,
+              "duration": 0.75,
+              "velocity": 108
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 43,
+              "duration": 0.5,
+              "velocity": 98
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 44,
+              "duration": 0.5,
+              "velocity": 100
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.0,
+              "pitch": 46,
+              "duration": 0.75,
+              "velocity": 104
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/贝司/o3-bass"
+    },
+    {
+      "name": "Flexis Stadium Chords",
+      "kind": "instrument",
+      "channel": 2,
+      "volume": 80,
+      "pan": 56,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "eq",
+          "enabled": true,
+          "params": {
+            "bands": [
+              {
+                "type": "low_shelf",
+                "frequency": 160,
+                "gain_db": -2,
+                "q": 0.707
+              },
+              {
+                "type": "peaking",
+                "frequency": 1400,
+                "gain_db": 1.5,
+                "q": 0.9
+              },
+              {
+                "type": "high_shelf",
+                "frequency": 7600,
+                "gain_db": 2,
+                "q": 0.707
+              }
+            ]
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": 0.18,
+            "decay": 0.34
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "flexis-progression",
+          "name": "Pop Chord Engine",
+          "bar": 1.0,
+          "beats": 16.0,
+          "color": "#8de35d",
+          "loop_count": 20,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 60,
+              "duration": 2.0,
+              "velocity": 78
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 63,
+              "duration": 2.0,
+              "velocity": 70
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 67,
+              "duration": 2.0,
+              "velocity": 74
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 60,
+              "duration": 1.0,
+              "velocity": 68
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 63,
+              "duration": 1.0,
+              "velocity": 62
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 67,
+              "duration": 1.0,
+              "velocity": 64
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 68,
+              "duration": 2.0,
+              "velocity": 78
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 2.0,
+              "velocity": 70
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 75,
+              "duration": 2.0,
+              "velocity": 74
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 68,
+              "duration": 1.0,
+              "velocity": 68
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 72,
+              "duration": 1.0,
+              "velocity": 62
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 75,
+              "duration": 1.0,
+              "velocity": 64
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 56,
+              "duration": 2.0,
+              "velocity": 78
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 60,
+              "duration": 2.0,
+              "velocity": 70
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 63,
+              "duration": 2.0,
+              "velocity": 74
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 56,
+              "duration": 1.0,
+              "velocity": 68
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 60,
+              "duration": 1.0,
+              "velocity": 62
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 63,
+              "duration": 1.0,
+              "velocity": 64
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 65,
+              "duration": 2.0,
+              "velocity": 78
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 68,
+              "duration": 2.0,
+              "velocity": 70
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 2.0,
+              "velocity": 74
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 65,
+              "duration": 1.0,
+              "velocity": 70
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 68,
+              "duration": 1.0,
+              "velocity": 64
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 72,
+              "duration": 1.0,
+              "velocity": 66
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/键盘乐器/flexis-pop-keys"
+    },
+    {
+      "name": "Padis Neon Atmosphere",
+      "kind": "instrument",
+      "channel": 3,
+      "volume": 68,
+      "pan": 64,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "eq",
+          "enabled": true,
+          "params": {
+            "bands": [
+              {
+                "type": "low_shelf",
+                "frequency": 180,
+                "gain_db": -3,
+                "q": 0.707
+              },
+              {
+                "type": "peaking",
+                "frequency": 900,
+                "gain_db": -1,
+                "q": 1
+              },
+              {
+                "type": "high_shelf",
+                "frequency": 6800,
+                "gain_db": 2.5,
+                "q": 0.707
+              }
+            ]
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": 0.38,
+            "decay": 0.62
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "padis-wide-pad",
+          "name": "Wide Theater Pad",
+          "bar": 1.0,
+          "beats": 16.0,
+          "color": "#55b7d6",
+          "loop_count": 20,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 48,
+              "duration": 16.0,
+              "velocity": 62
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 55,
+              "duration": 16.0,
+              "velocity": 54
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 60,
+              "duration": 16.0,
+              "velocity": 50
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 63,
+              "duration": 16.0,
+              "velocity": 46
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/音垫/serumis-glass-pad"
+    },
+    {
+      "name": "Sytrix Chrome Bells",
+      "kind": "instrument",
+      "channel": 4,
+      "volume": 70,
+      "pan": 78,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "pitch_shifter",
+          "enabled": false,
+          "params": {
+            "semitones": 12,
+            "mix": 0.35
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "time": 0.26,
+            "feedback": 0.2,
+            "mix": 0.18
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "sytrix-pre-bells",
+          "name": "Pre-Chorus Bells",
+          "bar": 25.0,
+          "beats": 16.0,
+          "color": "#ffc44d",
+          "loop_count": 4,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 0.5,
+              "velocity": 70
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 75,
+              "duration": 0.5,
+              "velocity": 64
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 79,
+              "duration": 0.5,
+              "velocity": 66
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.5,
+              "pitch": 82,
+              "duration": 0.5,
+              "velocity": 70
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 80,
+              "duration": 0.5,
+              "velocity": 68
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 84,
+              "duration": 0.5,
+              "velocity": 66
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 87,
+              "duration": 0.5,
+              "velocity": 70
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.5,
+              "pitch": 84,
+              "duration": 0.5,
+              "velocity": 62
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 68,
+              "duration": 0.5,
+              "velocity": 70
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 72,
+              "duration": 0.5,
+              "velocity": 64
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 75,
+              "duration": 0.5,
+              "velocity": 66
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.5,
+              "pitch": 79,
+              "duration": 0.5,
+              "velocity": 70
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 77,
+              "duration": 0.5,
+              "velocity": 70
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 80,
+              "duration": 0.5,
+              "velocity": 66
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 84,
+              "duration": 0.5,
+              "velocity": 72
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.5,
+              "pitch": 87,
+              "duration": 0.5,
+              "velocity": 78
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/管弦乐器/string-pad"
+    },
+    {
+      "name": "Serumis Vocal Lead",
+      "kind": "instrument",
+      "channel": 5,
+      "volume": 76,
+      "pan": 48,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "eq",
+          "enabled": true,
+          "params": {
+            "bands": [
+              {
+                "type": "low_shelf",
+                "frequency": 180,
+                "gain_db": -4,
+                "q": 0.707
+              },
+              {
+                "type": "peaking",
+                "frequency": 2400,
+                "gain_db": 2,
+                "q": 1
+              },
+              {
+                "type": "high_shelf",
+                "frequency": 9200,
+                "gain_db": 2.5,
+                "q": 0.707
+              }
+            ]
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "time": 0.23,
+            "feedback": 0.24,
+            "mix": 0.18
+          }
+        },
+        {
+          "type": "limiter",
+          "enabled": true,
+          "params": {
+            "ceiling_db": -2,
+            "release": 0.08
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "serumis-hook-a",
+          "name": "Chorus Hook",
+          "bar": 33.0,
+          "beats": 16.0,
+          "color": "#32d374",
+          "loop_count": 3,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 75,
+              "duration": 0.75,
+              "velocity": 90
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 77,
+              "duration": 0.5,
+              "velocity": 82
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 79,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 82,
+              "duration": 0.75,
+              "velocity": 94
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 80,
+              "duration": 0.5,
+              "velocity": 84
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 79,
+              "duration": 1.0,
+              "velocity": 88
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 72,
+              "duration": 0.75,
+              "velocity": 88
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 75,
+              "duration": 0.5,
+              "velocity": 84
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 79,
+              "duration": 1.0,
+              "velocity": 92
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 77,
+              "duration": 0.5,
+              "velocity": 86
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 79,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 82,
+              "duration": 1.25,
+              "velocity": 96
+            }
+          ]
+        },
+        {
+          "id": "serumis-hook-final",
+          "name": "Final Hook",
+          "bar": 57.0,
+          "beats": 16.0,
+          "color": "#22e386",
+          "loop_count": 5,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 75,
+              "duration": 0.75,
+              "velocity": 92
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 77,
+              "duration": 0.5,
+              "velocity": 84
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 79,
+              "duration": 1.0,
+              "velocity": 94
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 82,
+              "duration": 0.75,
+              "velocity": 96
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 84,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 87,
+              "duration": 1.0,
+              "velocity": 98
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 84,
+              "duration": 0.75,
+              "velocity": 92
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 82,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 79,
+              "duration": 1.0,
+              "velocity": 94
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 77,
+              "duration": 0.5,
+              "velocity": 88
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 79,
+              "duration": 0.5,
+              "velocity": 90
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 82,
+              "duration": 1.25,
+              "velocity": 98
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/合成器/serumis-metal-lead"
+    },
+    {
+      "name": "Harmonis Runway Pluck",
+      "kind": "instrument",
+      "channel": 6,
+      "volume": 72,
+      "pan": 74,
+      "muted": false,
+      "solo": false,
+      "record_armed": false,
+      "effects": [
+        {
+          "type": "eq",
+          "enabled": true,
+          "params": {
+            "bands": [
+              {
+                "type": "low_shelf",
+                "frequency": 220,
+                "gain_db": -5,
+                "q": 0.707
+              },
+              {
+                "type": "peaking",
+                "frequency": 1800,
+                "gain_db": 1.5,
+                "q": 1.2
+              },
+              {
+                "type": "high_shelf",
+                "frequency": 10000,
+                "gain_db": 2,
+                "q": 0.707
+              }
+            ]
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": 0.2,
+            "decay": 0.36
+          }
+        }
+      ],
+      "notes": [],
+      "clips": [
+        {
+          "id": "harmonis-runway",
+          "name": "Glitter Pluck Figure",
+          "bar": 17.0,
+          "beats": 16.0,
+          "color": "#c68cff",
+          "loop_count": 16,
+          "notes": [
+            {
+              "bar": 1.0,
+              "beat": 1.0,
+              "pitch": 84,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 1.0,
+              "beat": 1.5,
+              "pitch": 79,
+              "duration": 0.25,
+              "velocity": 62
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.0,
+              "pitch": 75,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 1.0,
+              "beat": 2.5,
+              "pitch": 79,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.0,
+              "pitch": 84,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 1.0,
+              "beat": 3.5,
+              "pitch": 79,
+              "duration": 0.25,
+              "velocity": 62
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.0,
+              "pitch": 75,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 1.0,
+              "beat": 4.5,
+              "pitch": 79,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.0,
+              "pitch": 87,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 2.0,
+              "beat": 1.5,
+              "pitch": 82,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.0,
+              "pitch": 80,
+              "duration": 0.25,
+              "velocity": 66
+            },
+            {
+              "bar": 2.0,
+              "beat": 2.5,
+              "pitch": 82,
+              "duration": 0.25,
+              "velocity": 66
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.0,
+              "pitch": 87,
+              "duration": 0.25,
+              "velocity": 74
+            },
+            {
+              "bar": 2.0,
+              "beat": 3.5,
+              "pitch": 82,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.0,
+              "pitch": 80,
+              "duration": 0.25,
+              "velocity": 66
+            },
+            {
+              "bar": 2.0,
+              "beat": 4.5,
+              "pitch": 82,
+              "duration": 0.25,
+              "velocity": 66
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.0,
+              "pitch": 80,
+              "duration": 0.25,
+              "velocity": 70
+            },
+            {
+              "bar": 3.0,
+              "beat": 1.5,
+              "pitch": 75,
+              "duration": 0.25,
+              "velocity": 62
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.0,
+              "pitch": 72,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 3.0,
+              "beat": 2.5,
+              "pitch": 75,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.0,
+              "pitch": 80,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 3.0,
+              "beat": 3.5,
+              "pitch": 75,
+              "duration": 0.25,
+              "velocity": 62
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.0,
+              "pitch": 72,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 3.0,
+              "beat": 4.5,
+              "pitch": 75,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.0,
+              "pitch": 82,
+              "duration": 0.25,
+              "velocity": 72
+            },
+            {
+              "bar": 4.0,
+              "beat": 1.5,
+              "pitch": 77,
+              "duration": 0.25,
+              "velocity": 64
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.0,
+              "pitch": 74,
+              "duration": 0.25,
+              "velocity": 66
+            },
+            {
+              "bar": 4.0,
+              "beat": 2.5,
+              "pitch": 77,
+              "duration": 0.25,
+              "velocity": 66
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.0,
+              "pitch": 82,
+              "duration": 0.25,
+              "velocity": 74
+            },
+            {
+              "bar": 4.0,
+              "beat": 3.5,
+              "pitch": 86,
+              "duration": 0.25,
+              "velocity": 78
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.0,
+              "pitch": 89,
+              "duration": 0.25,
+              "velocity": 82
+            },
+            {
+              "bar": 4.0,
+              "beat": 4.5,
+              "pitch": 91,
+              "duration": 0.5,
+              "velocity": 86
+            }
+          ]
+        }
+      ],
+      "audio_clips": [],
+      "preset": "SYSTEM/合成器/harmonis-bright-pluck"
+    }
+  ],
+  "master_effects": [
+    {
+      "type": "eq",
+      "enabled": true,
+      "params": {
+        "bands": [
+          {
+            "type": "low_shelf",
+            "frequency": 120,
+            "gain_db": 0,
+            "q": 0.707
+          },
+          {
+            "type": "peaking",
+            "frequency": 1000,
+            "gain_db": 0,
+            "q": 1
+          },
+          {
+            "type": "high_shelf",
+            "frequency": 8000,
+            "gain_db": 0,
+            "q": 0.707
+          }
+        ]
+      }
+    },
+    {
+      "type": "compressor",
+      "enabled": true,
+      "params": {
+        "threshold_db": -16,
+        "ratio": 2,
+        "attack": 0.02,
+        "release": 0.12,
+        "makeup_db": 0
+      }
+    },
+    {
+      "type": "limiter",
+      "enabled": true,
+      "params": {
+        "ceiling_db": -1,
+        "release": 0.08
+      }
+    }
+  ]
+}

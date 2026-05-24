@@ -1,0 +1,15 @@
+{
+  "display_name": "Sytrix Digital Bass",
+  "description": "带数字泛音的 FM Bass",
+  "synth_engine": "sytrix",
+  "operators": [
+    { "ratio": 0.5, "level": 0.76, "role": "carrier", "feedback": 0.08 },
+    { "ratio": 1.0, "level": 0.5, "role": "modulator", "feedback": 0.15 },
+    { "ratio": 2.0, "level": 0.25, "role": "modulator", "feedback": 0.0 },
+    { "ratio": 1.0, "level": 0.22, "role": "carrier", "feedback": 0.0 }
+  ],
+  "matrix": [[0, 0.48, 0.12, 0], [0, 0, 0.2, 0], [0, 0, 0, 0], [0, 0.1, 0, 0]],
+  "amp_envelope": { "attack": 0.003, "decay": 0.16, "sustain": 0.82, "release": 0.08 },
+  "tail_seconds": 0.12,
+  "output_gain": 0.34
+}

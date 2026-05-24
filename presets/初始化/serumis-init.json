@@ -1,0 +1,16 @@
+{
+  "display_name": "Serumis Init",
+  "description": "双 wavetable 振荡器、Sub、Noise、Filter 和 LFO 的基础音色",
+  "synth_engine": "serumis",
+  "serumis_oscillators": [
+    { "enabled": true, "wave": "basic", "ratio": 1.0, "gain": 0.52, "detune_cents": 0, "unison": 1, "blend": 0.0, "warp": 0.12 },
+    { "enabled": true, "wave": "metal", "ratio": 1.0, "gain": 0.34, "detune_cents": 7, "unison": 3, "blend": 0.42, "warp": 0.32 }
+  ],
+  "sub": { "enabled": true, "wave": "sine", "ratio": 0.5, "gain": 0.16 },
+  "noise": { "enabled": false, "gain": 0.04, "seed": 19 },
+  "filter": { "enabled": true, "type": "lowpass", "cutoff_hz": 6400, "resonance": 0.22, "drive": 0.12 },
+  "lfo": { "enabled": true, "rate_hz": 2.2, "filter_amount": 0.18 },
+  "amp_envelope": { "attack": 0.006, "decay": 0.22, "sustain": 0.72, "release": 0.12 },
+  "tail_seconds": 0.24,
+  "output_gain": 0.28
+}

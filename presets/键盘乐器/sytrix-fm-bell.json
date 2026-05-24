@@ -1,0 +1,15 @@
+{
+  "display_name": "Sytrix FM Bell",
+  "description": "明亮的 FM Bell / 电钢质感",
+  "synth_engine": "sytrix",
+  "operators": [
+    { "ratio": 1.0, "level": 0.72, "role": "carrier", "feedback": 0.0 },
+    { "ratio": 3.0, "level": 0.58, "role": "modulator", "feedback": 0.05 },
+    { "ratio": 5.0, "level": 0.32, "role": "modulator", "feedback": 0.0 },
+    { "ratio": 2.0, "level": 0.18, "role": "carrier", "feedback": 0.0 }
+  ],
+  "matrix": [[0, 0.72, 0.18, 0], [0, 0, 0.22, 0], [0, 0, 0, 0], [0, 0.18, 0, 0]],
+  "amp_envelope": { "attack": 0.002, "decay": 0.42, "sustain": 0.28, "release": 0.32 },
+  "tail_seconds": 0.42,
+  "output_gain": 0.28
+}

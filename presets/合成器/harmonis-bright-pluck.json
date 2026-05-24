@@ -1,0 +1,9 @@
+{
+  "display_name": "Harmonis Bright Pluck",
+  "description": "明亮、干净、快速衰减的频谱 Pluck",
+  "synth_engine": "harmonis",
+  "harmonics": { "count": 24, "brightness": 0.78, "odd_even": 0.25, "tilt": 0.82, "pluck": 0.72, "unison": 1 },
+  "amp_envelope": { "attack": 0.002, "decay": 0.16, "sustain": 0.24, "release": 0.08 },
+  "tail_seconds": 0.12,
+  "output_gain": 0.26
+}

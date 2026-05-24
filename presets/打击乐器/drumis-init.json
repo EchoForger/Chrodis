@@ -1,0 +1,10 @@
+{
+  "display_name": "Drumis Init Kit",
+  "description": "自动 MIDI 鼓映射的合成鼓组",
+  "synth_engine": "drumis",
+  "drum_type": "auto",
+  "tone": { "body": 0.8, "snap": 0.35, "decay": 0.28, "seed": 911 },
+  "amp_envelope": { "attack": 0.001, "decay": 0.08, "sustain": 0.0, "release": 0.08 },
+  "tail_seconds": 0.32,
+  "output_gain": 0.55
+}

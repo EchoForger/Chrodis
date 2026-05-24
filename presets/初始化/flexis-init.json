@@ -1,0 +1,9 @@
+{
+  "display_name": "Flexis Init",
+  "description": "快速预设型合成器基础音色，8 个宏控制整体音色",
+  "synth_engine": "flexis",
+  "macros": { "tone": 0.55, "shape": 0.35, "motion": 0.2, "attack": 0.08, "release": 0.18, "space": 0.25, "drive": 0.08, "mix": 0.72 },
+  "amp_envelope": { "attack": 0.02, "decay": 0.24, "sustain": 0.72, "release": 0.18 },
+  "tail_seconds": 0.24,
+  "output_gain": 0.32
+}

@@ -1,0 +1,13 @@
+{
+  "display_name": "Padis Init",
+  "description": "双层生成式颗粒 Pad",
+  "synth_engine": "padis",
+  "layers": [
+    { "wave": "vowel", "ratio": 1.0, "gain": 0.5, "grain_size": 0.28, "density": 0.55, "motion": 0.18, "spread": 0.25 },
+    { "wave": "mirror", "ratio": 1.5, "gain": 0.34, "grain_size": 0.45, "density": 0.4, "motion": 0.28, "spread": 0.35 }
+  ],
+  "texture": { "noise": true, "gain": 0.035, "seed": 101 },
+  "amp_envelope": { "attack": 0.32, "decay": 0.7, "sustain": 0.76, "release": 0.9 },
+  "tail_seconds": 1.0,
+  "output_gain": 0.25
+}

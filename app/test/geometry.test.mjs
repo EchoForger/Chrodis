@@ -135,7 +135,8 @@ function presetEngine(preset) {
 }
 
 function normalizeSynthEngine(value) {
-  return String(value || 'o3').toLowerCase() === 'o3' ? 'o3' : 'o3';
+  const engine = String(value || 'o3').toLowerCase();
+  return ['o3', 'serumis', 'flexis', 'sytrix', 'harmonis', 'padis', 'drumis'].includes(engine) ? engine : 'o3';
 }
 
 function presetCategories(presets) {
@@ -323,10 +324,15 @@ test('project presets inherit base data then deeply apply overrides', () => {
   assert.deepEqual(preset.amp_envelope, { attack: 0.01, decay: 0.2, sustain: 0.4 });
 });
 
-test('synth engine values normalize to o3 for filtering', () => {
+test('synth engine values normalize for filtering', () => {
   assert.equal(normalizeSynthEngine('anything'), 'o3');
   assert.equal(normalizeSynthEngine('o3'), 'o3');
+  assert.equal(normalizeSynthEngine('serumis'), 'serumis');
+  assert.equal(normalizeSynthEngine('flexis'), 'flexis');
+  assert.equal(normalizeSynthEngine('drumis'), 'drumis');
   assert.equal(filterPresetsByEngine([{ name: 'old', synth_engine: 'anything' }], 'o3').length, 1);
+  assert.equal(filterPresetsByEngine([{ name: 'serumis', synth_engine: 'serumis' }], 'serumis').length, 1);
+  assert.equal(filterPresetsByEngine([{ name: 'flexis', synth_engine: 'flexis' }], 'flexis').length, 1);
 });
 
 test('control angle maps pan endpoints and center exactly', () => {

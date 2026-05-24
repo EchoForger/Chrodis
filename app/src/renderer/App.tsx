@@ -491,7 +491,7 @@ function App() {
     if (current) commitProject(cloneProject(current));
   }
 
-  async function patchProjectMeta(patch: Partial<Pick<Project, 'title' | 'bpm' | 'key' | 'time_signature' | 'length_bars'>>) {
+  async function patchProjectMeta(patch: Partial<Project>) {
     mutateProject(draft => {
       Object.assign(draft, patch);
     });
@@ -1317,7 +1317,7 @@ function App() {
           </div>
         </div>
         {showMixer && <div className="panel-resizer horizontal" onMouseDown={startMixerResize} />}
-        {showMixer && <Mixer project={project} onPatchTrack={patchTrack} renderTrackIcon={track => <TrackIcon kind={track.kind} preset={track.preset} size={18} />} />}
+        {showMixer && <Mixer project={project} onPatchTrack={patchTrack} onPatchProject={patchProjectMeta} renderTrackIcon={track => <TrackIcon kind={track.kind} preset={track.preset} size={18} />} />}
         {openClip && editorMode === 'docked' && <div className="panel-resizer horizontal" onMouseDown={startEditorResize} />}
         {openClip && editorMode === 'docked' && <PianoRoll trackIndex={editorClip!.track} track={project.tracks[editorClip!.track]} clip={openClip} tool={tool} mode={editorMode} selectedNotes={selectedNotes} selectedNote={selectedNote} noteRow={noteRow} pxPerBeat={pianoPxPerBeat} verticalWheelDirection={preferences.editing.verticalWheelDirection} onZoom={zoomPiano} onMode={setEditorMode} onClose={() => setEditorClip(null)} quantizeStep={quantizeStep} onQuantizeStep={setQuantizeStep} onCanvasDoubleClick={addNoteFromEditor} onSelectNote={(event, index) => selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event))} onContextNote={(event, index) => { selectNoteKey(editorClip!.track, openClip.id, index, isAdditiveSelection(event)); openContextMenu(event, [
           { label: '删除音符', action: () => deleteNoteDirect(editorClip!.track, openClip.id, index) },
@@ -1812,7 +1812,43 @@ const FALLBACK_PRESET_DISPLAY_NAMES: Record<string, string> = {
   'SYSTEM/电影音效/fx-pulse': 'Pulse FX',
   'SYSTEM/合成器/o3-lead': 'O3 Bright Lead',
   'SYSTEM/贝司/o3-bass': 'O3 Dirty Bass',
-  'SYSTEM/音垫/o3-pad': 'O3 Soft Pad'
+  'SYSTEM/音垫/o3-pad': 'O3 Soft Pad',
+  'SYSTEM/初始化/serumis-init': 'Serumis Init',
+  'SYSTEM/合成器/serumis-metal-lead': 'Serumis Metal Lead',
+  'SYSTEM/音垫/serumis-glass-pad': 'Serumis Glass Pad',
+  'SYSTEM/初始化/flexis-init': 'Flexis Init',
+  'SYSTEM/键盘乐器/flexis-pop-keys': 'Flexis Pop Keys',
+  'SYSTEM/贝司/flexis-modern-bass': 'Flexis Modern Bass',
+  'SYSTEM/初始化/sytrix-init': 'Sytrix Init',
+  'SYSTEM/键盘乐器/sytrix-fm-bell': 'Sytrix FM Bell',
+  'SYSTEM/贝司/sytrix-digital-bass': 'Sytrix Digital Bass',
+  'SYSTEM/初始化/harmonis-init': 'Harmonis Init',
+  'SYSTEM/合成器/harmonis-bright-pluck': 'Harmonis Bright Pluck',
+  'SYSTEM/合成器/harmonis-spectral-lead': 'Harmonis Spectral Lead',
+  'SYSTEM/初始化/padis-init': 'Padis Init',
+  'SYSTEM/音垫/padis-cinema-drone': 'Padis Cinema Drone',
+  'SYSTEM/音垫/padis-glimmer-pad': 'Padis Glimmer Pad',
+  'SYSTEM/打击乐器/drumis-init': 'Drumis Init Kit',
+  'SYSTEM/打击乐器/drumis-punch-kick': 'Drumis Punch Kick',
+  'SYSTEM/打击乐器/drumis-snap-snare': 'Drumis Snap Snare',
+  'SYSTEM/Serumis/init': 'Serumis Init',
+  'SYSTEM/Serumis/metal-lead': 'Serumis Metal Lead',
+  'SYSTEM/Serumis/glass-pad': 'Serumis Glass Pad',
+  'SYSTEM/Flexis/init': 'Flexis Init',
+  'SYSTEM/Flexis/pop-keys': 'Flexis Pop Keys',
+  'SYSTEM/Flexis/modern-bass': 'Flexis Modern Bass',
+  'SYSTEM/Sytrix/init': 'Sytrix Init',
+  'SYSTEM/Sytrix/fm-bell': 'Sytrix FM Bell',
+  'SYSTEM/Sytrix/digital-bass': 'Sytrix Digital Bass',
+  'SYSTEM/Harmonis/init': 'Harmonis Init',
+  'SYSTEM/Harmonis/bright-pluck': 'Harmonis Bright Pluck',
+  'SYSTEM/Harmonis/spectral-lead': 'Harmonis Spectral Lead',
+  'SYSTEM/Padis/init': 'Padis Init',
+  'SYSTEM/Padis/cinema-drone': 'Padis Cinema Drone',
+  'SYSTEM/Padis/glimmer-pad': 'Padis Glimmer Pad',
+  'SYSTEM/Drumis/init': 'Drumis Init Kit',
+  'SYSTEM/Drumis/punch-kick': 'Drumis Punch Kick',
+  'SYSTEM/Drumis/snap-snare': 'Drumis Snap Snare'
 };
 
 function presetDisplayName(library: PresetLibraryData | null, presetName: string): string {

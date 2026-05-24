@@ -1,0 +1,10 @@
+{
+  "display_name": "Drumis Punch Kick",
+  "description": "有冲击力的合成 Kick",
+  "synth_engine": "drumis",
+  "drum_type": "kick",
+  "tone": { "body": 1.0, "snap": 0.62, "decay": 0.42, "seed": 911 },
+  "amp_envelope": { "attack": 0.001, "decay": 0.08, "sustain": 0.0, "release": 0.1 },
+  "tail_seconds": 0.45,
+  "output_gain": 0.62
+}

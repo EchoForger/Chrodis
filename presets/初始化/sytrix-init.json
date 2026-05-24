@@ -1,0 +1,15 @@
+{
+  "display_name": "Sytrix Init",
+  "description": "4 Operator FM 基础音色",
+  "synth_engine": "sytrix",
+  "operators": [
+    { "ratio": 1.0, "level": 0.85, "role": "carrier", "feedback": 0.0 },
+    { "ratio": 2.0, "level": 0.35, "role": "modulator", "feedback": 0.0 },
+    { "ratio": 3.0, "level": 0.18, "role": "modulator", "feedback": 0.0 },
+    { "ratio": 0.5, "level": 0.25, "role": "carrier", "feedback": 0.0 }
+  ],
+  "matrix": [[0, 0.42, 0.12, 0], [0, 0, 0.08, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  "amp_envelope": { "attack": 0.006, "decay": 0.24, "sustain": 0.7, "release": 0.12 },
+  "tail_seconds": 0.18,
+  "output_gain": 0.3
+}

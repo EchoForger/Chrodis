@@ -14,10 +14,14 @@ def apply_effects(buffer: np.ndarray, effects: list[Effect], sample_rate: int) -
         params = effect.params
         if effect.type == "eq":
             output = apply_eq(output, sample_rate, params)
+        elif effect.type == "gate":
+            output = apply_gate(output, sample_rate, params)
         elif effect.type == "compressor":
             output = apply_compressor(output, sample_rate, params)
         elif effect.type == "limiter":
             output = apply_limiter(output, params)
+        elif effect.type == "pitch_shifter":
+            output = apply_pitch_shifter(output, params)
         elif effect.type == "reverb":
             output = apply_reverb(output, sample_rate, params)
         elif effect.type == "delay":
@@ -29,9 +33,9 @@ def apply_eq(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarray:
     output = buffer
     for band in params.get("bands", []):
         kind = band.get("type", "peaking")
-        freq = float(band.get("frequency", 1_000))
-        gain_db = float(band.get("gain_db", 0))
-        q = float(band.get("q", 0.707))
+        freq = clamp(float(band.get("frequency", 1_000)), 20.0, sample_rate * 0.45)
+        gain_db = clamp(float(band.get("gain_db", 0)), -24.0, 24.0)
+        q = clamp(float(band.get("q", 0.707)), 0.1, 12.0)
         coeffs = biquad_coefficients(kind, freq, gain_db, q, sample_rate)
         output = biquad_filter(output, coeffs)
     return output
@@ -84,10 +88,10 @@ def biquad_filter(buffer: np.ndarray, coeffs: tuple[float, ...]) -> np.ndarray:
 
 def apply_compressor(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarray:
     threshold = db_to_linear(float(params.get("threshold_db", -18)))
-    ratio = float(params.get("ratio", 3))
+    ratio = clamp(float(params.get("ratio", 3)), 1.0, 40.0)
     makeup = db_to_linear(float(params.get("makeup_db", 0)))
-    attack = math.exp(-1 / (sample_rate * float(params.get("attack", 0.01))))
-    release = math.exp(-1 / (sample_rate * float(params.get("release", 0.08))))
+    attack = math.exp(-1 / (sample_rate * clamp(float(params.get("attack", 0.01)), 0.0001, 2.0)))
+    release = math.exp(-1 / (sample_rate * clamp(float(params.get("release", 0.08)), 0.001, 5.0)))
     envelope = 0.0
     output = np.zeros_like(buffer)
     for index, frame in enumerate(buffer):
@@ -103,6 +107,24 @@ def apply_compressor(buffer: np.ndarray, sample_rate: int, params: dict) -> np.n
     return output
 
 
+def apply_gate(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarray:
+    threshold = db_to_linear(float(params.get("threshold_db", -42)))
+    attack = math.exp(-1 / (sample_rate * clamp(float(params.get("attack", 0.004)), 0.0001, 1.0)))
+    release = math.exp(-1 / (sample_rate * clamp(float(params.get("release", 0.08)), 0.001, 5.0)))
+    range_gain = db_to_linear(clamp(float(params.get("range_db", -48)), -80.0, 0.0))
+    envelope = 0.0
+    gate = 0.0
+    output = np.zeros_like(buffer)
+    for index, frame in enumerate(buffer):
+        level = float(np.max(np.abs(frame)))
+        envelope = max(level, envelope * release)
+        target = 1.0 if envelope >= threshold else range_gain
+        coeff = attack if target > gate else release
+        gate = coeff * gate + (1 - coeff) * target
+        output[index] = frame * gate
+    return output
+
+
 def apply_limiter(buffer: np.ndarray, params: dict) -> np.ndarray:
     ceiling = db_to_linear(float(params.get("ceiling_db", -0.8)))
     peak = float(np.max(np.abs(buffer))) if buffer.size else 0.0
@@ -111,10 +133,24 @@ def apply_limiter(buffer: np.ndarray, params: dict) -> np.ndarray:
     return buffer * (ceiling / peak)
 
 
+def apply_pitch_shifter(buffer: np.ndarray, params: dict) -> np.ndarray:
+    semitones = clamp(float(params.get("semitones", 0)), -24.0, 24.0)
+    mix = clamp(float(params.get("mix", 1.0)), 0.0, 1.0)
+    if abs(semitones) < 1e-6 or mix <= 0:
+        return buffer
+    factor = 2.0 ** (semitones / 12.0)
+    source_positions = np.arange(buffer.shape[0], dtype=np.float64)
+    shifted_positions = np.arange(buffer.shape[0], dtype=np.float64) * factor
+    shifted = np.zeros_like(buffer)
+    for channel in range(buffer.shape[1]):
+        shifted[:, channel] = np.interp(shifted_positions, source_positions, buffer[:, channel], left=0.0, right=0.0)
+    return buffer * (1.0 - mix) + shifted * mix
+
+
 def apply_delay(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarray:
-    delay_samples = max(1, int(float(params.get("time", 0.25)) * sample_rate))
-    feedback = float(params.get("feedback", 0.25))
-    mix = float(params.get("mix", 0.2))
+    delay_samples = max(1, int(clamp(float(params.get("time", 0.25)), 0.001, 4.0) * sample_rate))
+    feedback = clamp(float(params.get("feedback", 0.25)), 0.0, 0.95)
+    mix = clamp(float(params.get("mix", 0.2)), 0.0, 1.0)
     output = np.copy(buffer)
     for index in range(delay_samples, len(output)):
         output[index] += output[index - delay_samples] * feedback * mix
@@ -122,8 +158,8 @@ def apply_delay(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarra
 
 
 def apply_reverb(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarray:
-    mix = float(params.get("mix", 0.18))
-    decay = float(params.get("decay", 0.45))
+    mix = clamp(float(params.get("mix", 0.18)), 0.0, 1.0)
+    decay = clamp(float(params.get("decay", 0.45)), 0.0, 0.95)
     output = np.copy(buffer)
     for delay in (0.0297, 0.0371, 0.0411, 0.053):
         samples = max(1, int(delay * sample_rate))
@@ -134,3 +170,7 @@ def apply_reverb(buffer: np.ndarray, sample_rate: int, params: dict) -> np.ndarr
 
 def db_to_linear(value: float) -> float:
     return 10 ** (value / 20)
+
+
+def clamp(value: float, minimum: float, maximum: float) -> float:
+    return max(minimum, min(maximum, value))

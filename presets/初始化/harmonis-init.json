@@ -1,0 +1,9 @@
+{
+  "display_name": "Harmonis Init",
+  "description": "加法/频谱型基础音色",
+  "synth_engine": "harmonis",
+  "harmonics": { "count": 16, "brightness": 0.58, "odd_even": 0.1, "tilt": 1.1, "pluck": 0.2, "unison": 1 },
+  "amp_envelope": { "attack": 0.006, "decay": 0.26, "sustain": 0.66, "release": 0.18 },
+  "tail_seconds": 0.24,
+  "output_gain": 0.28
+}

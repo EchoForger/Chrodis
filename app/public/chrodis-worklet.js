@@ -1,4 +1,6 @@
 import { synthSampleO3 } from './synths/o3.js';
+import { synthSampleSerumis } from './synths/serumis.js';
+import { synthSampleDrumis, synthSampleFlexis, synthSampleHarmonis, synthSamplePadis, synthSampleSytrix } from './synths/core-synths.js';
 
 const TAU = Math.PI * 2;
 const MAX_VOICES = 96;
@@ -6,13 +8,20 @@ const MAX_VOICES = 96;
 class ChrodisWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
-    this.project = { bpm: 120, lengthBeats: 128, tracks: [], events: [], audioEvents: [], presets: {} };
+    this.project = { bpm: 120, lengthBeats: 128, tracks: [], events: [], audioEvents: [], presets: {}, masterEffects: [] };
     this.audioBuffers = {};
     this.masterGain = 0.9;
     this.playing = false;
     this.currentBeat = 0;
     this.eventCursor = 0;
     this.voices = [];
+    this.voiceLeft = 0;
+    this.voiceRight = 0;
+    this.audioLeft = 0;
+    this.audioRight = 0;
+    this.trackLeft = new Float32Array(0);
+    this.trackRight = new Float32Array(0);
+    this.effectStates = {};
     this.positionCountdown = 0;
     this.port.onmessage = event => this.handleMessage(event.data);
   }
@@ -23,8 +32,12 @@ class ChrodisWorklet extends AudioWorkletProcessor {
       this.project = message.project;
       this.project.events = this.project.events || [];
       this.project.audioEvents = this.project.audioEvents || [];
+      this.project.masterEffects = this.project.masterEffects || [];
       this.project.events.sort((a, b) => a.startBeat - b.startBeat || a.pitch - b.pitch);
       this.audioBuffers = message.audioBuffers || {};
+      this.trackLeft = new Float32Array(this.project.tracks.length);
+      this.trackRight = new Float32Array(this.project.tracks.length);
+      this.effectStates = {};
       this.seekTo(this.currentBeat);
     } else if (message.type === 'setMasterGain') {
       this.masterGain = Math.max(0, Math.min(1.5, numberOr(0.9, message.gain)));
@@ -45,6 +58,7 @@ class ChrodisWorklet extends AudioWorkletProcessor {
       const tailSeconds = numberOr(0.3, preset.tail_seconds);
       this.voices.push({
         kind: 'instrument',
+        engine: preset.synth_engine || 'o3',
         preset,
         pitch: message.pitch,
         frequency: midiToHz(message.pitch),
@@ -54,6 +68,7 @@ class ChrodisWorklet extends AudioWorkletProcessor {
         ageSamples: 0,
         phases: [],
         isPreview: true,
+        trackIndex: -1,
         gain: 1,
         leftGain: 0.7,
         rightGain: 0.7
@@ -100,11 +115,25 @@ class ChrodisWorklet extends AudioWorkletProcessor {
 
     const beatPerSample = this.project.bpm / 60 / sampleRate;
     for (let frame = 0; frame < left.length; frame += 1) {
+      this.trackLeft.fill(0);
+      this.trackRight.fill(0);
       this.scheduleEvents(this.currentBeat);
-      const mixed = this.renderVoices();
-      const audio = this.renderAudioClips(this.currentBeat);
-      left[frame] = softLimit((mixed[0] + audio[0]) * this.masterGain);
-      right[frame] = softLimit((mixed[1] + audio[1]) * this.masterGain);
+      this.renderVoices();
+      this.renderAudioClips(this.currentBeat);
+      let sumLeft = this.voiceLeft + this.audioLeft;
+      let sumRight = this.voiceRight + this.audioRight;
+      for (let trackIndex = 0; trackIndex < this.project.tracks.length; trackIndex += 1) {
+        let trackLeft = this.trackLeft[trackIndex];
+        let trackRight = this.trackRight[trackIndex];
+        if (trackLeft || trackRight) {
+          const processed = this.applyEffectChain(trackLeft, trackRight, this.project.tracks[trackIndex].effects || [], `t${trackIndex}`);
+          sumLeft += processed.left;
+          sumRight += processed.right;
+        }
+      }
+      const master = this.applyEffectChain(sumLeft, sumRight, this.project.masterEffects || [], 'm');
+      left[frame] = softLimit(master.left * this.masterGain);
+      right[frame] = softLimit(master.right * this.masterGain);
       this.currentBeat += beatPerSample;
       this.positionCountdown -= 1;
       if (this.positionCountdown <= 0) {
@@ -134,8 +163,10 @@ class ChrodisWorklet extends AudioWorkletProcessor {
     const velocity = Math.max(0, Math.min(1, event.velocity / 127));
     const pan = Math.max(0, Math.min(1, track.pan / 127));
     const gain = Math.pow(track.volume / 127, 1.5);
+    if (ageSeconds >= durationSeconds + tailSeconds) return;
     this.voices.push({
       kind: track.kind,
+      engine: preset.synth_engine || 'o3',
       preset,
       pitch: event.pitch,
       frequency: midiToHz(event.pitch),
@@ -144,6 +175,7 @@ class ChrodisWorklet extends AudioWorkletProcessor {
       totalSeconds: durationSeconds + tailSeconds,
       ageSamples: Math.round(ageSeconds * sampleRate),
       phases: [],
+      trackIndex: event.trackIndex,
       gain,
       leftGain: Math.cos(pan * Math.PI / 2) * gain,
       rightGain: Math.sin(pan * Math.PI / 2) * gain
@@ -154,21 +186,38 @@ class ChrodisWorklet extends AudioWorkletProcessor {
   renderVoices() {
     let left = 0;
     let right = 0;
-    const survivors = [];
-    for (const voice of this.voices) {
-      const sample = voice.kind === 'drum' ? drumSample(voice) : synthSampleO3(voice);
-      left += sample * voice.leftGain;
-      right += sample * voice.rightGain;
+    for (let index = this.voices.length - 1; index >= 0; index -= 1) {
+      const voice = this.voices[index];
+      const sample = voice.kind === 'drum' && voice.engine !== 'drumis' ? drumSample(voice)
+        : voice.engine === 'serumis' ? synthSampleSerumis(voice)
+        : voice.engine === 'flexis' ? synthSampleFlexis(voice)
+        : voice.engine === 'sytrix' ? synthSampleSytrix(voice)
+        : voice.engine === 'harmonis' ? synthSampleHarmonis(voice)
+        : voice.engine === 'padis' ? synthSamplePadis(voice)
+        : voice.engine === 'drumis' ? synthSampleDrumis(voice)
+        : synthSampleO3(voice);
+      if (voice.trackIndex >= 0 && voice.trackIndex < this.trackLeft.length) {
+        this.trackLeft[voice.trackIndex] += sample * voice.leftGain;
+        this.trackRight[voice.trackIndex] += sample * voice.rightGain;
+      } else {
+        left += sample * voice.leftGain;
+        right += sample * voice.rightGain;
+      }
       voice.ageSamples += 1;
-      if (voice.ageSamples / sampleRate < voice.totalSeconds) survivors.push(voice);
+      if (voice.ageSamples >= voice.totalSeconds * sampleRate) this.voices.splice(index, 1);
     }
-    this.voices = survivors;
-    return [left, right];
+    this.voiceLeft = left;
+    this.voiceRight = right;
   }
 
   renderAudioClips(beat) {
     let left = 0;
     let right = 0;
+    if (!this.project.audioEvents?.length) {
+      this.audioLeft = 0;
+      this.audioRight = 0;
+      return;
+    }
     for (const event of this.project.audioEvents || []) {
       const track = this.project.tracks[event.trackIndex];
       const buffer = this.audioBuffers[event.assetPath];
@@ -182,13 +231,187 @@ class ChrodisWorklet extends AudioWorkletProcessor {
       const pan = Math.max(0, Math.min(1, track.pan / 127));
       const leftGain = Math.cos(pan * Math.PI / 2) * gain;
       const rightGain = Math.sin(pan * Math.PI / 2) * gain;
-      left += channels[0][sourceIndex] * leftGain;
-      right += (channels[1] || channels[0])[sourceIndex] * rightGain;
+      this.trackLeft[event.trackIndex] += channels[0][sourceIndex] * leftGain;
+      this.trackRight[event.trackIndex] += (channels[1] || channels[0])[sourceIndex] * rightGain;
     }
-    return [left, right];
+    this.audioLeft = left;
+    this.audioRight = right;
+  }
+
+  applyEffectChain(left, right, effects, scope) {
+    let l = left;
+    let r = right;
+    for (let index = 0; index < effects.length; index += 1) {
+      const effect = effects[index];
+      if (!effect || effect.enabled === false) continue;
+      const state = this.effectState(`${scope}:${index}:${effect.type}`);
+      const processed = applyEffectSample(l, r, effect, state);
+      l = processed.left;
+      r = processed.right;
+    }
+    return { left: l, right: r };
+  }
+
+  effectState(key) {
+    return this.effectStates[key] || (this.effectStates[key] = {});
   }
 }
 
+
+function applyEffectSample(left, right, effect, state) {
+  const params = effect.params || {};
+  if (effect.type === 'eq') return applyEqSample(left, right, params, state);
+  if (effect.type === 'gate') return applyGateSample(left, right, params, state);
+  if (effect.type === 'compressor') return applyCompressorSample(left, right, params, state);
+  if (effect.type === 'limiter') return applyLimiterSample(left, right, params);
+  if (effect.type === 'delay') return applyDelaySample(left, right, params, state);
+  if (effect.type === 'reverb') return applyReverbSample(left, right, params, state);
+  return { left, right };
+}
+
+function applyEqSample(left, right, params, state) {
+  const bands = Array.isArray(params.bands) ? params.bands : [];
+  let l = left;
+  let r = right;
+  if (!state.bands || state.source !== bands) {
+    state.source = bands;
+    state.bands = bands.map(band => ({
+      coeffs: biquadCoefficients(
+        band.type || 'peaking',
+        clamp(numberOr(1000, band.frequency), 20, sampleRate * 0.45),
+        clamp(numberOr(0, band.gain_db), -24, 24),
+        clamp(numberOr(0.707, band.q), 0.1, 12)
+      ),
+      lx1: 0, lx2: 0, ly1: 0, ly2: 0,
+      rx1: 0, rx2: 0, ry1: 0, ry2: 0
+    }));
+  }
+  for (const band of state.bands) {
+    const c = band.coeffs;
+    const nextL = c.b0 * l + c.b1 * band.lx1 + c.b2 * band.lx2 - c.a1 * band.ly1 - c.a2 * band.ly2;
+    band.lx2 = band.lx1; band.lx1 = l; band.ly2 = band.ly1; band.ly1 = nextL;
+    l = nextL;
+    const nextR = c.b0 * r + c.b1 * band.rx1 + c.b2 * band.rx2 - c.a1 * band.ry1 - c.a2 * band.ry2;
+    band.rx2 = band.rx1; band.rx1 = r; band.ry2 = band.ry1; band.ry1 = nextR;
+    r = nextR;
+  }
+  return { left: l, right: r };
+}
+
+function biquadCoefficients(kind, freq, gainDb, q) {
+  const a = 10 ** (gainDb / 40);
+  const omega = TAU * freq / sampleRate;
+  const sn = Math.sin(omega);
+  const cs = Math.cos(omega);
+  const alpha = sn / (2 * q);
+  let b0, b1, b2, a0, a1, a2;
+  if (kind === 'low_shelf') {
+    const beta = Math.sqrt(a) / q;
+    b0 = a * ((a + 1) - (a - 1) * cs + beta * sn);
+    b1 = 2 * a * ((a - 1) - (a + 1) * cs);
+    b2 = a * ((a + 1) - (a - 1) * cs - beta * sn);
+    a0 = (a + 1) + (a - 1) * cs + beta * sn;
+    a1 = -2 * ((a - 1) + (a + 1) * cs);
+    a2 = (a + 1) + (a - 1) * cs - beta * sn;
+  } else if (kind === 'high_shelf') {
+    const beta = Math.sqrt(a) / q;
+    b0 = a * ((a + 1) + (a - 1) * cs + beta * sn);
+    b1 = -2 * a * ((a - 1) + (a + 1) * cs);
+    b2 = a * ((a + 1) + (a - 1) * cs - beta * sn);
+    a0 = (a + 1) - (a - 1) * cs + beta * sn;
+    a1 = 2 * ((a - 1) - (a + 1) * cs);
+    a2 = (a + 1) - (a - 1) * cs - beta * sn;
+  } else {
+    b0 = 1 + alpha * a;
+    b1 = -2 * cs;
+    b2 = 1 - alpha * a;
+    a0 = 1 + alpha / a;
+    a1 = -2 * cs;
+    a2 = 1 - alpha / a;
+  }
+  return { b0: b0 / a0, b1: b1 / a0, b2: b2 / a0, a1: a1 / a0, a2: a2 / a0 };
+}
+
+function applyGateSample(left, right, params, state) {
+  const threshold = dbToLinear(numberOr(-42, params.threshold_db));
+  const range = dbToLinear(clamp(numberOr(-48, params.range_db), -80, 0));
+  const attack = coeff(numberOr(0.004, params.attack));
+  const release = coeff(numberOr(0.08, params.release));
+  const level = Math.max(Math.abs(left), Math.abs(right));
+  state.envelope = Math.max(level, numberOr(0, state.envelope) * release);
+  const target = state.envelope >= threshold ? 1 : range;
+  const current = numberOr(0, state.gain);
+  const c = target > current ? attack : release;
+  state.gain = c * current + (1 - c) * target;
+  return { left: left * state.gain, right: right * state.gain };
+}
+
+function applyCompressorSample(left, right, params, state) {
+  const threshold = dbToLinear(numberOr(-18, params.threshold_db));
+  const ratio = clamp(numberOr(3, params.ratio), 1, 40);
+  const makeup = dbToLinear(numberOr(0, params.makeup_db));
+  const attack = coeff(numberOr(0.01, params.attack));
+  const release = coeff(numberOr(0.08, params.release));
+  const level = Math.max(Math.abs(left), Math.abs(right));
+  const current = numberOr(0, state.envelope);
+  const c = level > current ? attack : release;
+  state.envelope = c * current + (1 - c) * level;
+  let gain = 1;
+  if (state.envelope > threshold && threshold > 0) {
+    gain = (state.envelope / threshold) ** (1 / ratio - 1);
+  }
+  return { left: left * gain * makeup, right: right * gain * makeup };
+}
+
+function applyLimiterSample(left, right, params) {
+  const ceiling = dbToLinear(numberOr(-0.8, params.ceiling_db));
+  const peak = Math.max(Math.abs(left), Math.abs(right));
+  if (peak <= ceiling || peak <= 0) return { left, right };
+  const gain = ceiling / peak;
+  return { left: left * gain, right: right * gain };
+}
+
+function applyDelaySample(left, right, params, state) {
+  const delaySamples = Math.max(1, Math.round(clamp(numberOr(0.25, params.time), 0.001, 4) * sampleRate));
+  if (!state.left || state.delaySamples !== delaySamples) {
+    state.delaySamples = delaySamples;
+    state.left = new Float32Array(delaySamples);
+    state.right = new Float32Array(delaySamples);
+    state.index = 0;
+  }
+  const index = state.index || 0;
+  const wetL = state.left[index];
+  const wetR = state.right[index];
+  const feedback = clamp(numberOr(0.25, params.feedback), 0, 0.95);
+  const mix = clamp(numberOr(0.2, params.mix), 0, 1);
+  state.left[index] = left + wetL * feedback;
+  state.right[index] = right + wetR * feedback;
+  state.index = (index + 1) % delaySamples;
+  return { left: left * (1 - mix) + wetL * mix, right: right * (1 - mix) + wetR * mix };
+}
+
+function applyReverbSample(left, right, params, state) {
+  const taps = [0.0297, 0.0371, 0.0411, 0.053];
+  if (!state.taps) {
+    state.taps = taps.map(delay => ({ left: new Float32Array(Math.max(1, Math.round(delay * sampleRate))), right: new Float32Array(Math.max(1, Math.round(delay * sampleRate))), index: 0 }));
+  }
+  const mix = clamp(numberOr(0.18, params.mix), 0, 1);
+  const decay = clamp(numberOr(0.45, params.decay), 0, 0.95);
+  let wetL = 0;
+  let wetR = 0;
+  for (const tap of state.taps) {
+    const delayedL = tap.left[tap.index];
+    const delayedR = tap.right[tap.index];
+    wetL += delayedL;
+    wetR += delayedR;
+    tap.left[tap.index] = left + delayedL * decay;
+    tap.right[tap.index] = right + delayedR * decay;
+    tap.index = (tap.index + 1) % tap.left.length;
+  }
+  wetL /= state.taps.length;
+  wetR /= state.taps.length;
+  return { left: left * (1 - mix) + wetL * mix, right: right * (1 - mix) + wetR * mix };
+}
 
 function drumSample(voice) {
   const t = voice.ageSamples / sampleRate;
@@ -239,6 +462,18 @@ function highpassNoise(t, seed) {
 
 function softLimit(value) {
   return Math.tanh(value * 1.2) * 0.85;
+}
+
+function dbToLinear(value) {
+  return 10 ** (value / 20);
+}
+
+function coeff(seconds) {
+  return Math.exp(-1 / (sampleRate * clamp(seconds, 0.0001, 5)));
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function numberOr(fallback, value) {

@@ -1,0 +1,16 @@
+{
+  "display_name": "Serumis Metal Lead",
+  "description": "高频丰富、带金属质感的 Serumis 主奏音色",
+  "synth_engine": "serumis",
+  "serumis_oscillators": [
+    { "enabled": true, "wave": "metal", "ratio": 1.0, "gain": 0.5, "detune_cents": 0, "unison": 3, "blend": 0.5, "warp": 0.62 },
+    { "enabled": true, "wave": "digital", "ratio": 2.0, "gain": 0.22, "detune_cents": 12, "unison": 5, "blend": 0.34, "warp": 0.48 }
+  ],
+  "sub": { "enabled": false, "wave": "sine", "ratio": 0.5, "gain": 0.1 },
+  "noise": { "enabled": true, "gain": 0.035, "seed": 47 },
+  "filter": { "enabled": true, "type": "lowpass", "cutoff_hz": 9200, "resonance": 0.46, "drive": 0.28 },
+  "lfo": { "enabled": true, "rate_hz": 3.4, "filter_amount": 0.24 },
+  "amp_envelope": { "attack": 0.004, "decay": 0.16, "sustain": 0.76, "release": 0.08 },
+  "tail_seconds": 0.18,
+  "output_gain": 0.26
+}

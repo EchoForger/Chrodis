@@ -1,0 +1,13 @@
+{
+  "display_name": "Padis Cinema Drone",
+  "description": "缓慢演化的电影感 Drone",
+  "synth_engine": "padis",
+  "layers": [
+    { "wave": "mirror", "ratio": 0.5, "gain": 0.46, "grain_size": 0.62, "density": 0.34, "motion": 0.08, "spread": 0.5 },
+    { "wave": "metal", "ratio": 1.0, "gain": 0.22, "grain_size": 0.78, "density": 0.28, "motion": 0.12, "spread": 0.42 }
+  ],
+  "texture": { "noise": true, "gain": 0.055, "seed": 301 },
+  "amp_envelope": { "attack": 0.75, "decay": 0.9, "sustain": 0.84, "release": 1.3 },
+  "tail_seconds": 1.4,
+  "output_gain": 0.24
+}

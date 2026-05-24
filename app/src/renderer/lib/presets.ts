@@ -1,13 +1,20 @@
 import { type PresetData, type PresetLibraryData } from '../realtime/project';
 
-export type SynthEngine = 'o3';
+export type SynthEngine = 'o3' | 'serumis' | 'flexis' | 'sytrix' | 'harmonis' | 'padis' | 'drumis';
 
 export function normalizeSynthEngine(value: unknown): SynthEngine {
-  return String(value || 'o3').toLowerCase() === 'o3' ? 'o3' : 'o3';
+  const engine = String(value || 'o3').toLowerCase();
+  return ['o3', 'serumis', 'flexis', 'sytrix', 'harmonis', 'padis', 'drumis'].includes(engine) ? engine as SynthEngine : 'o3';
 }
 
 export function synthEngineLabel(value: unknown): string {
   const engine = normalizeSynthEngine(value);
+  if (engine === 'serumis') return 'Serumis';
+  if (engine === 'flexis') return 'Flexis';
+  if (engine === 'sytrix') return 'Sytrix';
+  if (engine === 'harmonis') return 'Harmonis';
+  if (engine === 'padis') return 'Padis';
+  if (engine === 'drumis') return 'Drumis';
   if (engine === 'o3') return 'O3';
   return 'O3';
 }

@@ -1,0 +1,9 @@
+{
+  "display_name": "Flexis Modern Bass",
+  "description": "快速可用的现代合成贝司",
+  "synth_engine": "flexis",
+  "macros": { "tone": 0.28, "shape": 0.62, "motion": 0.16, "attack": 0.01, "release": 0.1, "space": 0.08, "drive": 0.32, "mix": 0.58 },
+  "amp_envelope": { "attack": 0.004, "decay": 0.14, "sustain": 0.82, "release": 0.08 },
+  "tail_seconds": 0.12,
+  "output_gain": 0.38
+}

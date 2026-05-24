@@ -1,0 +1,9 @@
+{
+  "display_name": "Flexis Pop Keys",
+  "description": "适合流行编曲的快速键盘音色",
+  "synth_engine": "flexis",
+  "macros": { "tone": 0.64, "shape": 0.28, "motion": 0.12, "attack": 0.03, "release": 0.22, "space": 0.38, "drive": 0.05, "mix": 0.78 },
+  "amp_envelope": { "attack": 0.006, "decay": 0.28, "sustain": 0.62, "release": 0.2 },
+  "tail_seconds": 0.28,
+  "output_gain": 0.34
+}

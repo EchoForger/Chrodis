@@ -107,6 +107,23 @@ class ProjectModelTests(unittest.TestCase):
         self.assertIn("SYSTEM/合成器/o3-lead", names)
         self.assertIn("SYSTEM/贝司/o3-bass", names)
         self.assertIn("SYSTEM/音垫/o3-pad", names)
+        self.assertIn("SYSTEM/初始化/serumis-init", names)
+        self.assertIn("SYSTEM/初始化/flexis-init", names)
+        self.assertIn("SYSTEM/初始化/sytrix-init", names)
+        self.assertIn("SYSTEM/初始化/harmonis-init", names)
+        self.assertIn("SYSTEM/初始化/padis-init", names)
+        self.assertIn("SYSTEM/打击乐器/drumis-init", names)
+        self.assertIn("SYSTEM/键盘乐器/flexis-pop-keys", names)
+        self.assertIn("SYSTEM/贝司/flexis-modern-bass", names)
+        self.assertIn("SYSTEM/合成器/serumis-metal-lead", names)
+        self.assertNotIn("SYSTEM/Flexis/init", names)
+
+    def test_legacy_synth_preset_paths_still_resolve(self) -> None:
+        resolver = PresetResolver(system_dir=Path("presets"))
+
+        self.assertEqual(resolver.resolve("SYSTEM/Flexis/init").data["synth_engine"], "flexis")
+        self.assertEqual(resolver.resolve("SYSTEM/Serumis/glass-pad").data["synth_engine"], "serumis")
+        self.assertEqual(resolver.resolve("SYSTEM/Drumis/init").data["synth_engine"], "drumis")
 
     def test_project_round_trip_without_project_presets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -148,18 +165,18 @@ class ProjectModelTests(unittest.TestCase):
             self.assertEqual(preset.data["amp_envelope"]["sustain"], 0.22)
             self.assertEqual(preset.data["amp_envelope"]["attack"], base.data["amp_envelope"]["attack"])
 
-    def test_preset_library_normalizes_any_engine_to_o3(self) -> None:
+    def test_preset_library_preserves_known_synth_engines(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             preset_dir = Path(tmp) / "presets" / "合成器"
             preset_dir.mkdir(parents=True)
             (preset_dir / "legacy.json").write_text(
-                json.dumps({"display_name": "Legacy", "synth_engine": "anything"}),
+                json.dumps({"display_name": "Sytrix", "synth_engine": "sytrix"}),
                 encoding="utf-8",
             )
 
             resolver = PresetResolver(system_dir=preset_dir.parent)
 
-            self.assertEqual(resolver.resolve("SYSTEM/合成器/legacy").data["synth_engine"], "o3")
+            self.assertEqual(resolver.resolve("SYSTEM/合成器/legacy").data["synth_engine"], "sytrix")
 
     def test_pattern_adds_notes(self) -> None:
         project = Project(title="Song", tracks=[Track(name="Drums", kind="drum", channel=9)])
@@ -261,6 +278,29 @@ class ProjectModelTests(unittest.TestCase):
 
         self.assertEqual(processed.shape, buffer.shape)
         self.assertLessEqual(float(np.max(np.abs(processed))), 1.0)
+
+    def test_effects_support_core_plugin_types(self) -> None:
+        sample_rate = 8_000
+        t = np.arange(sample_rate // 20, dtype=np.float64) / sample_rate
+        mono = np.sin(2 * np.pi * 220 * t) * 0.2
+        buffer = np.stack([mono, mono], axis=1)
+        processed = apply_effects(
+            buffer,
+            [
+                Effect(type="eq", params={"bands": [{"type": "peaking", "frequency": 1_000, "gain_db": 2, "q": 1}]}),
+                Effect(type="gate", params={"threshold_db": -60, "range_db": -48, "attack": 0.002, "release": 0.04}),
+                Effect(type="compressor", params={"threshold_db": -20, "ratio": 2, "attack": 0.004, "release": 0.08}),
+                Effect(type="pitch_shifter", params={"semitones": 3, "mix": 0.5}),
+                Effect(type="delay", params={"time": 0.02, "feedback": 0.2, "mix": 0.2}),
+                Effect(type="reverb", params={"mix": 0.1, "decay": 0.2}),
+                Effect(type="limiter", params={"ceiling_db": -1}),
+            ],
+            sample_rate,
+        )
+
+        self.assertEqual(processed.shape, buffer.shape)
+        self.assertFalse(np.isnan(processed).any())
+        self.assertGreater(float(np.max(np.abs(processed))), 0)
 
     def test_import_midi_round_trip(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
